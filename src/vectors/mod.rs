@@ -26,6 +26,12 @@ where
     }
 }
 
+impl Default for Vec3<f32> {
+    fn default() -> Self {
+        Self(0.0, 0.0, 0.0)
+    }
+}
+
 impl Vec3<f32> {
     pub fn norm_sqr(&self) -> f32 {
         self.x() * self.x() + self.y() * self.y() + self.z() * self.z()
