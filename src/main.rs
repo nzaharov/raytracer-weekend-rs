@@ -4,7 +4,9 @@ mod objects;
 mod rays;
 mod vectors;
 
-use hit::Hittable;
+use std::f32::INFINITY;
+
+use hit::{HitList, Hittable};
 use image::RgbImage;
 use indicatif::{ProgressBar, ProgressStyle};
 use objects::sphere::Sphere;
@@ -20,6 +22,24 @@ fn main() {
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
+
+    // Scene
+    let mut scene = HitList::new();
+    let sphere1 = Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+    };
+    let sphere2 = Sphere {
+        center: Point3::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+    };
+    let sphere3 = Sphere {
+        center: Point3::new(1.0, 0.0, -2.0),
+        radius: 0.5,
+    };
+    scene.add(&sphere1);
+    scene.add(&sphere2);
+    scene.add(&sphere3);
 
     // Camera
     const VIEWPORT_HEIGHT: f32 = 2.0;
@@ -50,7 +70,7 @@ fn main() {
             let direction = lower_left_corner + u * horizontal + v * vertical - origin;
             let ray = Ray::new(origin, direction);
 
-            img.put_pixel(x, HEIGHT - 1 - y, ray_color(ray).into());
+            img.put_pixel(x, HEIGHT - 1 - y, ray_color(ray, &scene).into());
         }
     }
 
@@ -63,20 +83,9 @@ fn main() {
     println!("Finished!");
 }
 
-fn ray_color(ray: Ray) -> Color {
-    let sphere = Sphere {
-        center: Point3::new(0.0, 0.0, -1.0),
-        radius: 0.5,
-    };
-    let hit = sphere.hit(&ray, -1.0, 1.0);
-
-    if let Some(hit) = hit {
-        let normal: Vec3<f32> = ray.at(hit.t) - Vec3::new(0.0, 0.0, -1.0);
-        let unit_normal = normal.unit_vector();
-        // normalize to [0,1]
-        let normalized: Vec3<f32> = 0.5 * (unit_normal + 1.0);
-
-        return normalized;
+fn ray_color(ray: Ray, scene: &HitList<impl Hittable>) -> Color {
+    if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
+        return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
     }
 
     let unit_direction = ray.direction().unit_vector();
