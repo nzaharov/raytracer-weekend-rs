@@ -74,7 +74,7 @@ fn main() {
                 color += ray_color(ray, &scene, MAX_DEPTH, &mut rng);
             }
 
-            let color = multisample_pixel(color, SAMPLE_SIZE);
+            let color = calculate_pixel_color(color, SAMPLE_SIZE);
 
             img.put_pixel(x, HEIGHT - 1 - y, color);
         }
@@ -89,10 +89,14 @@ fn main() {
     println!("Finished in {} ms", now.elapsed().as_millis());
 }
 
-fn multisample_pixel(color: Color, sample_size: u32) -> Rgb<u8> {
+fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
     let scale = 1.0 / sample_size as f32;
-    let color = color * scale;
     let (r, g, b) = (color.x(), color.y(), color.z());
+
+    // Gamma correction (gamma=2.0)
+    let r = (scale * r).sqrt();
+    let g = (scale * g).sqrt();
+    let b = (scale * b).sqrt();
 
     Rgb([
         (256.0 * clamp(r, 0.0, 0.999)) as u8,
@@ -118,7 +122,8 @@ fn ray_color(
     }
 
     if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
-        let target: Point3<f32> = hit.point + hit.normal + Vec3::random_in_unit_sphere(&mut rng);
+        let target: Point3<f32> =
+            hit.point + hit.normal + Vec3::random_in_hemisphere(&mut rng, &hit.normal);
         let child_ray = Ray::new(hit.point, target - hit.point);
 
         return ray_color(child_ray, scene, depth - 1, &mut rng);

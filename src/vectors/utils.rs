@@ -95,6 +95,18 @@ impl Vec3<f32> {
             }
         }
     }
+
+    pub fn random_unit_vector(mut rng: &mut ThreadRng) -> Self {
+        Self::random_in_unit_sphere(&mut rng).unit_vector()
+    }
+
+    pub fn random_in_hemisphere(mut rng: &mut ThreadRng, normal: &Vec3<f32>) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere(&mut rng);
+        if normal.dot(&in_unit_sphere) > 0.0 {
+            return in_unit_sphere;
+        }
+        -in_unit_sphere
+    }
 }
 
 impl<T> Display for Vec3<T>
