@@ -1,9 +1,11 @@
 use crate::vectors::{Point3, Vec3};
 
+pub type Color = Vec3<f32>;
+
 pub struct Ray(Vec3<f32>, Point3<f32>);
 
 impl Ray {
-    pub fn new(direction: Vec3<f32>, origin: Point3<f32>) -> Self {
+    pub fn new(origin: Point3<f32>, direction: Vec3<f32>) -> Self {
         Self(origin, direction)
     }
 

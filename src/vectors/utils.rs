@@ -1,3 +1,5 @@
+use image::Rgb;
+
 use super::Vec3;
 use std::{
     fmt::Display,
@@ -9,6 +11,14 @@ impl Add for Vec3<f32> {
 
     fn add(self, rhs: Self) -> Self::Output {
         Self(self.x() + rhs.x(), self.y() + rhs.y(), self.z() + rhs.z())
+    }
+}
+
+impl Add<f32> for Vec3<f32> {
+    type Output = Self;
+
+    fn add(self, rhs: f32) -> Self::Output {
+        Self(self.x() + rhs, self.y() + rhs, self.z() + rhs)
     }
 }
 
@@ -67,6 +77,16 @@ impl Vec3<f32> {
             self.z() * rhs.x() - self.x() * rhs.z(),
             self.x() * rhs.y() - self.y() * rhs.x(),
         )
+    }
+}
+
+impl Into<Rgb<u8>> for Vec3<f32> {
+    fn into(self) -> Rgb<u8> {
+        Rgb([
+            (256.0 * self.x()) as u8,
+            (256.0 * self.y()) as u8,
+            (256.0 * self.z()) as u8,
+        ])
     }
 }
 
