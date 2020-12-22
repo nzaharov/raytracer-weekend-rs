@@ -1,4 +1,5 @@
 #![warn(clippy::all)]
+mod rays;
 mod vectors;
 
 use image::RgbImage;
