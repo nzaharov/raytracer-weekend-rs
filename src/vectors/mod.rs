@@ -1,6 +1,8 @@
+pub mod utils;
+
 use std::ops::{AddAssign, DivAssign, MulAssign, Neg};
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 pub struct Vec3<T>(T, T, T);
 
 impl<T> Vec3<T>
