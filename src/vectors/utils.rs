@@ -1,5 +1,3 @@
-use image::Rgb;
-
 use super::Vec3;
 use std::{
     fmt::Display,
@@ -77,16 +75,6 @@ impl Vec3<f32> {
             self.z() * rhs.x() - self.x() * rhs.z(),
             self.x() * rhs.y() - self.y() * rhs.x(),
         )
-    }
-}
-
-impl Into<Rgb<u8>> for Vec3<f32> {
-    fn into(self) -> Rgb<u8> {
-        Rgb([
-            (256.0 * self.x()) as u8,
-            (256.0 * self.y()) as u8,
-            (256.0 * self.z()) as u8,
-        ])
     }
 }
 

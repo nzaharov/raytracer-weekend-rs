@@ -1,4 +1,5 @@
 #![warn(clippy::all)]
+mod camera;
 mod hit;
 mod objects;
 mod rays;
@@ -6,20 +7,27 @@ mod vectors;
 
 use std::f32::INFINITY;
 
+use camera::Camera;
 use hit::{HitList, Hittable};
-use image::RgbImage;
+use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
 use objects::sphere::Sphere;
+use rand::{thread_rng, Rng};
 use rays::{Color, Ray};
-use vectors::{Point3, Vec3};
+use vectors::Point3;
 
 const FILENAME: &str = "output/test.png";
 
 fn main() {
+    let mut rng = thread_rng();
+    // Start timer
+    let now = std::time::Instant::now();
+
     // Image
     const ASPECT_RATIO: f32 = 16.0 / 9.0;
-    const WIDTH: u32 = 400_u32;
+    const WIDTH: u32 = 400;
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
+    const SAMPLE_SIZE: u32 = 100;
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
@@ -42,15 +50,7 @@ fn main() {
     scene.add(&sphere3);
 
     // Camera
-    const VIEWPORT_HEIGHT: f32 = 2.0;
-    const VIEWPORT_WIDTH: f32 = ASPECT_RATIO * VIEWPORT_HEIGHT;
-    const FOCAL_LENGTH: f32 = 1.0;
-
-    let origin = Point3::<f32>::default();
-    let horizontal = Vec3::new(VIEWPORT_WIDTH, 0.0, 0.0);
-    let vertical = Vec3::new(0.0, VIEWPORT_HEIGHT, 0.0);
-    let lower_left_corner =
-        origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
+    let camera = Camera::new();
 
     // Progress bar init
     let progress = ProgressBar::new(HEIGHT.into());
@@ -64,13 +64,18 @@ fn main() {
     for y in (0..HEIGHT).rev() {
         progress.inc(1);
         for x in 0..WIDTH {
-            let u = x as f32 / (WIDTH - 1) as f32;
-            let v = y as f32 / (HEIGHT - 1) as f32;
+            let mut color = Color::default();
+            for _ in 0..SAMPLE_SIZE {
+                let u = (x as f32 + rng.gen::<f32>()) / (WIDTH - 1) as f32;
+                let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
 
-            let direction = lower_left_corner + u * horizontal + v * vertical - origin;
-            let ray = Ray::new(origin, direction);
+                let ray = camera.get_ray(u, v);
+                color += ray_color(ray, &scene);
+            }
 
-            img.put_pixel(x, HEIGHT - 1 - y, ray_color(ray, &scene).into());
+            let color = multisample_pixel(color, SAMPLE_SIZE);
+
+            img.put_pixel(x, HEIGHT - 1 - y, color);
         }
     }
 
@@ -78,9 +83,21 @@ fn main() {
 
     println!("\nSaving image...");
 
-    img.save(FILENAME).unwrap();
+    img.save(FILENAME).expect("Could not save image");
 
-    println!("Finished!");
+    println!("Finished in {} ms", now.elapsed().as_millis());
+}
+
+fn multisample_pixel(color: Color, sample_size: u32) -> Rgb<u8> {
+    let scale = 1.0 / sample_size as f32;
+    let color = color * scale;
+    let (r, g, b) = (color.x(), color.y(), color.z());
+
+    Rgb([
+        (256.0 * clamp(r, 0.0, 0.999)) as u8,
+        (256.0 * clamp(g, 0.0, 0.999)) as u8,
+        (256.0 * clamp(b, 0.0, 0.999)) as u8,
+    ])
 }
 
 fn ray_color(ray: Ray, scene: &HitList<impl Hittable>) -> Color {
@@ -94,4 +111,15 @@ fn ray_color(ray: Ray, scene: &HitList<impl Hittable>) -> Color {
     let end_value = Color::new(0.5, 0.7, 1.0);
 
     (1.0 - t) * start_value + t * end_value
+}
+
+// temporary implementation until the stabilized clamp is released
+fn clamp(x: f32, min: f32, max: f32) -> f32 {
+    if x < min {
+        return min;
+    }
+    if x > max {
+        return max;
+    }
+    x
 }
