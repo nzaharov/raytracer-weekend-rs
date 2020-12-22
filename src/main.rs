@@ -83,13 +83,13 @@ fn hit_sphere(center: Point3<f32>, radius: f32, ray: &Ray) -> f32 {
     // t2b⋅b+2tb⋅(A−C)+(A−C)⋅(A−C)−r2=0
     let oc: Vec3<f32> = ray.origin() - center;
     let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * oc.dot(&ray.direction());
+    let half_b = oc.dot(&ray.direction());
     let c = oc.dot(&oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let discriminant = half_b * half_b - a * c;
 
     if discriminant < 0.0 {
         return -1.0;
     }
 
-    (-b - discriminant.sqrt()) / (2.0 * a)
+    (-half_b - discriminant.sqrt()) / a
 }
