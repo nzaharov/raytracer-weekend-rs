@@ -9,15 +9,6 @@ use vectors::{Point3, Vec3};
 
 const FILENAME: &str = "output/test.png";
 
-fn ray_color(ray: Ray) -> Color {
-    let unit_direction = ray.direction().unit_vector();
-    let t = 0.5 * (unit_direction.y() + 1.0);
-    let start_value = Color::new(1.0, 1.0, 1.0);
-    let end_value = Color::new(0.5, 0.7, 1.0);
-
-    (1.0 - t) * start_value + t * end_value
-}
-
 fn main() {
     // Image
     const ASPECT_RATIO: f32 = 16.0 / 9.0;
@@ -52,10 +43,10 @@ fn main() {
             let u = x as f32 / (WIDTH - 1) as f32;
             let v = y as f32 / (HEIGHT - 1) as f32;
 
-            let gradient_direction = lower_left_corner + u * horizontal + v * vertical - origin;
-            let bg_ray = Ray::new(origin, gradient_direction);
+            let direction = lower_left_corner + u * horizontal + v * vertical - origin;
+            let ray = Ray::new(origin, direction);
 
-            img.put_pixel(x, HEIGHT - 1 - y, ray_color(bg_ray).into());
+            img.put_pixel(x, HEIGHT - 1 - y, ray_color(ray).into());
         }
     }
 
@@ -66,4 +57,39 @@ fn main() {
     img.save(FILENAME).unwrap();
 
     println!("Finished!");
+}
+
+fn ray_color(ray: Ray) -> Color {
+    let hit_location = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &ray);
+
+    if hit_location > 0.0 {
+        let normal: Vec3<f32> = ray.at(hit_location) - Vec3::new(0.0, 0.0, -1.0);
+        let unit_normal = normal.unit_vector();
+        // normalize to [0,1]
+        let normalized: Vec3<f32> = 0.5 * (unit_normal + 1.0);
+
+        return normalized;
+    }
+
+    let unit_direction = ray.direction().unit_vector();
+    let t = 0.5 * (unit_direction.y() + 1.0);
+    let start_value = Color::new(1.0, 1.0, 1.0);
+    let end_value = Color::new(0.5, 0.7, 1.0);
+
+    (1.0 - t) * start_value + t * end_value
+}
+
+fn hit_sphere(center: Point3<f32>, radius: f32, ray: &Ray) -> f32 {
+    // t2b⋅b+2tb⋅(A−C)+(A−C)⋅(A−C)−r2=0
+    let oc: Vec3<f32> = ray.origin() - center;
+    let a = ray.direction().dot(&ray.direction());
+    let b = 2.0 * oc.dot(&ray.direction());
+    let c = oc.dot(&oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+
+    if discriminant < 0.0 {
+        return -1.0;
+    }
+
+    (-b - discriminant.sqrt()) / (2.0 * a)
 }
