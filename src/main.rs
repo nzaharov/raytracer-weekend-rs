@@ -12,9 +12,9 @@ use hit::{HitList, Hittable};
 use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
 use objects::sphere::Sphere;
-use rand::{thread_rng, Rng};
+use rand::{prelude::ThreadRng, thread_rng, Rng};
 use rays::{Color, Ray};
-use vectors::Point3;
+use vectors::{Point3, Vec3};
 
 const FILENAME: &str = "output/test.png";
 
@@ -28,6 +28,7 @@ fn main() {
     const WIDTH: u32 = 400;
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
     const SAMPLE_SIZE: u32 = 100;
+    const MAX_DEPTH: u32 = 50;
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
@@ -70,7 +71,7 @@ fn main() {
                 let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
 
                 let ray = camera.get_ray(u, v);
-                color += ray_color(ray, &scene);
+                color += ray_color(ray, &scene, MAX_DEPTH, &mut rng);
             }
 
             let color = multisample_pixel(color, SAMPLE_SIZE);
@@ -100,9 +101,27 @@ fn multisample_pixel(color: Color, sample_size: u32) -> Rgb<u8> {
     ])
 }
 
-fn ray_color(ray: Ray, scene: &HitList<impl Hittable>) -> Color {
+fn ray_color(
+    ray: Ray,
+    scene: &HitList<impl Hittable>,
+    depth: u32,
+    mut rng: &mut ThreadRng,
+) -> Color {
+    // Color map
+    // if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
+    //     return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
+    // }
+
+    // Diffusion
+    if depth == 0 {
+        return Color::default();
+    }
+
     if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
-        return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
+        let target: Point3<f32> = hit.point + hit.normal + Vec3::random_in_unit_sphere(&mut rng);
+        let child_ray = Ray::new(hit.point, target - hit.point);
+
+        return ray_color(child_ray, scene, depth - 1, &mut rng);
     }
 
     let unit_direction = ray.direction().unit_vector();

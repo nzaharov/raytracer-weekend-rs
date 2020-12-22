@@ -1,3 +1,5 @@
+use rand::prelude::{Rng, ThreadRng};
+
 use super::Vec3;
 use std::{
     fmt::Display,
@@ -75,6 +77,23 @@ impl Vec3<f32> {
             self.z() * rhs.x() - self.x() * rhs.z(),
             self.x() * rhs.y() - self.y() * rhs.x(),
         )
+    }
+
+    pub fn new_random(rng: &mut ThreadRng, min: f32, max: f32) -> Self {
+        Self::new(
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+        )
+    }
+
+    pub fn random_in_unit_sphere(mut rng: &mut ThreadRng) -> Self {
+        loop {
+            let p = Vec3::new_random(&mut rng, -1.0, 1.0);
+            if p.norm_sqr() < 1.0 {
+                return p;
+            }
+        }
     }
 }
 
