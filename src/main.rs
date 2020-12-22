@@ -1,4 +1,6 @@
 #![warn(clippy::all)]
+mod vectors;
+
 use image::RgbImage;
 use indicatif::{ProgressBar, ProgressStyle};
 
