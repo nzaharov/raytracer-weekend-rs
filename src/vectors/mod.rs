@@ -9,6 +9,10 @@ impl<T> Vec3<T>
 where
     T: Copy + Clone,
 {
+    pub fn new(x: T, y: T, z: T) -> Self {
+        Self(x, y, z)
+    }
+
     pub fn x(&self) -> T {
         self.0
     }
