@@ -1,11 +1,13 @@
 #![warn(clippy::all)]
 mod hit;
-mod rays;
 mod objects;
+mod rays;
 mod vectors;
 
+use hit::Hittable;
 use image::RgbImage;
 use indicatif::{ProgressBar, ProgressStyle};
+use objects::sphere::Sphere;
 use rays::{Color, Ray};
 use vectors::{Point3, Vec3};
 
@@ -62,10 +64,14 @@ fn main() {
 }
 
 fn ray_color(ray: Ray) -> Color {
-    let hit_location = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &ray);
+    let sphere = Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+    };
+    let hit = sphere.hit(&ray, -1.0, 1.0);
 
-    if hit_location > 0.0 {
-        let normal: Vec3<f32> = ray.at(hit_location) - Vec3::new(0.0, 0.0, -1.0);
+    if let Some(hit) = hit {
+        let normal: Vec3<f32> = ray.at(hit.t) - Vec3::new(0.0, 0.0, -1.0);
         let unit_normal = normal.unit_vector();
         // normalize to [0,1]
         let normalized: Vec3<f32> = 0.5 * (unit_normal + 1.0);
@@ -79,19 +85,4 @@ fn ray_color(ray: Ray) -> Color {
     let end_value = Color::new(0.5, 0.7, 1.0);
 
     (1.0 - t) * start_value + t * end_value
-}
-
-fn hit_sphere(center: Point3<f32>, radius: f32, ray: &Ray) -> f32 {
-    // t2b⋅b+2tb⋅(A−C)+(A−C)⋅(A−C)−r2=0
-    let oc: Vec3<f32> = ray.origin() - center;
-    let a = ray.direction().dot(&ray.direction());
-    let half_b = oc.dot(&ray.direction());
-    let c = oc.dot(&oc) - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-
-    if discriminant < 0.0 {
-        return -1.0;
-    }
-
-    (-half_b - discriminant.sqrt()) / a
 }

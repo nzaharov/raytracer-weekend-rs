@@ -3,8 +3,8 @@ use crate::rays::*;
 use crate::vectors::*;
 
 pub struct Sphere {
-    center: Point3<f32>,
-    radius: f32,
+    pub center: Point3<f32>,
+    pub radius: f32,
 }
 
 impl Hittable for Sphere {
@@ -30,10 +30,9 @@ impl Hittable for Sphere {
         }
 
         let hit_point = ray.at(root);
-        Some(Hit {
-            point: hit_point,
-            normal: (hit_point - self.center) / self.radius,
-            t: root,
-        })
+        let outward_normal = (hit_point - self.center) / self.radius;
+        let hit = Hit::new(hit_point, root, &ray, &outward_normal);
+
+        Some(hit)
     }
 }
