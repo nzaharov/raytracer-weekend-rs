@@ -12,7 +12,7 @@ use camera::Camera;
 use hit::{HitList, Hittable};
 use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
-use materials::{lambertian::Lambertian, metal::Metal, Material};
+use materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal, Material};
 use objects::sphere::Sphere;
 use rand::{prelude::ThreadRng, thread_rng, Rng};
 use rays::{Color, Ray};
@@ -62,10 +62,17 @@ fn main() {
         radius: 0.5,
         material: &mat_metal,
     };
+    let glass_mat = Dielectric::new(1.5);
+    let crystal_ball = Sphere {
+        center: Point3::new(0.27, 0.1, -0.5),
+        radius: -0.05,
+        material: &glass_mat,
+    };
     scene.add(&sphere1);
     scene.add(&ground);
     scene.add(&sphere2);
     scene.add(&metal);
+    scene.add(&crystal_ball);
 
     // Camera
     let camera = Camera::new();

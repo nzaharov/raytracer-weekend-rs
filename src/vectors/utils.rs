@@ -116,6 +116,16 @@ impl Vec3<f32> {
     pub fn reflect(&self, normal: &Vec3<f32>) -> Vec3<f32> {
         *self - 2.0 * self.dot(normal) * *normal
     }
+
+    // coef = eta / eta'
+    pub fn refract(&self, normal: &Vec3<f32>, coef: f32) -> Vec3<f32> {
+        let normal = *normal;
+        let cos_theta = (-*self).dot(&normal).min(1.0);
+        let r_perpendicular: Vec3<f32> = coef * (*self + cos_theta * normal);
+        let r_parallel: Vec3<f32> = -(1.0 - r_perpendicular.norm_sqr()).abs().sqrt() * normal;
+
+        r_perpendicular + r_parallel
+    }
 }
 
 impl<T> Display for Vec3<T>
