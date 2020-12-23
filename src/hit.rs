@@ -1,27 +1,19 @@
-use std::marker::PhantomData;
-
 use crate::vectors::{Point3, Vec3};
 use crate::{materials::Material, rays::Ray};
 
-pub struct Hit<'a, T>
-where
-    T: Material,
-{
+pub struct Hit<'a> {
     pub point: Point3<f32>,
     pub normal: Vec3<f32>,
     pub t: f32,
     pub is_front_facing: bool,
-    pub material: &'a T,
+    pub material: &'a dyn Material,
 }
 
-impl<'a, T> Hit<'a, T>
-where
-    T: Material,
-{
+impl<'a> Hit<'a> {
     pub fn new(
         point: Point3<f32>,
         t: f32,
-        material: &'a T,
+        material: &'a dyn Material,
         ray: &Ray,
         outward_normal: &Vec3<f32>,
     ) -> Self {
@@ -41,28 +33,18 @@ where
     }
 }
 
-pub trait Hittable<F>
-where
-    F: Material,
-{
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit<F>>;
+pub trait Hittable {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit>;
 }
 
-pub struct HitList<'a, T, F>(Vec<&'a T>, PhantomData<F>)
-where
-    T: Hittable<F>,
-    F: Material;
+pub struct HitList<'a>(Vec<&'a dyn Hittable>);
 
-impl<'a, T, F> HitList<'a, T, F>
-where
-    T: Hittable<F>,
-    F: Material,
-{
+impl<'a> HitList<'a> {
     pub fn new() -> Self {
-        Self(Vec::new(), PhantomData)
+        Self(Vec::new())
     }
 
-    pub fn add(&mut self, obj: &'a T) {
+    pub fn add(&mut self, obj: &'a dyn Hittable) {
         self.0.push(obj);
     }
 
@@ -71,14 +53,10 @@ where
     }
 }
 
-impl<'a, T, F> Hittable<F> for HitList<'a, T, F>
-where
-    T: Hittable<F>,
-    F: Material,
-{
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit<F>> {
+impl<'a> Hittable for HitList<'a> {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let mut closest_hit_t = t_max;
-        let mut current_hit: Option<Hit<F>> = None;
+        let mut current_hit: Option<Hit> = None;
 
         for &obj in self.0.iter() {
             if let Some(hit) = obj.hit(ray, t_min, closest_hit_t) {

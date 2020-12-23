@@ -12,7 +12,7 @@ use camera::Camera;
 use hit::{HitList, Hittable};
 use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
-use materials::{lambertian::Lambertian, Material};
+use materials::{lambertian::Lambertian, metal::Metal, Material};
 use objects::sphere::Sphere;
 use rand::{prelude::ThreadRng, thread_rng, Rng};
 use rays::{Color, Ray};
@@ -37,33 +37,35 @@ fn main() {
 
     // Scene
     let mut scene = HitList::new();
-    let first = Lambertian {
-        albedo: Color::new(0.8, 0.8, 0.0),
-    };
-    let ground = Lambertian {
-        albedo: Color::new(0.7, 0.3, 0.3),
-    };
-    let second = Lambertian {
-        albedo: Color::default(),
-    };
+
+    let mat_1 = Lambertian::new(Color::new(0.8, 0.8, 0.0));
     let sphere1 = Sphere {
         center: Point3::new(0.0, 0.0, -1.0),
         radius: 0.5,
-        material: &first,
+        material: &mat_1,
     };
-    let sphere2 = Sphere {
+    let mat_ground = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let ground = Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
-        material: &ground,
+        material: &mat_ground,
     };
-    let sphere3 = Sphere {
+    let mat_2 = Lambertian::new(Color::default());
+    let sphere2 = Sphere {
         center: Point3::new(1.0, 0.0, -2.0),
         radius: 0.5,
-        material: &second,
+        material: &mat_2,
+    };
+    let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8));
+    let metal = Sphere {
+        center: Point3::new(-2.0, 0.0, -1.5),
+        radius: 100.0,
+        material: &mat_metal,
     };
     scene.add(&sphere1);
+    scene.add(&ground);
     scene.add(&sphere2);
-    scene.add(&sphere3);
+    scene.add(&metal);
 
     // Camera
     let camera = Camera::new();
@@ -120,15 +122,7 @@ fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
     ])
 }
 
-fn raytrace<T>(
-    ray: Ray,
-    scene: &HitList<impl Hittable<T>, T>,
-    depth: u32,
-    rng: &mut ThreadRng,
-) -> Color
-where
-    T: Material,
-{
+fn raytrace(ray: Ray, scene: &HitList, depth: u32, rng: &mut ThreadRng) -> Color {
     // Color map (TODO: extract as material)
     // if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
     //     return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));

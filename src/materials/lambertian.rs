@@ -6,16 +6,17 @@ use crate::ThreadRng;
 use crate::Vec3;
 
 pub struct Lambertian {
-    pub albedo: Color,
+    albedo: Color,
+}
+
+impl Lambertian {
+    pub fn new(albedo: Color) -> Self {
+        Self { albedo }
+    }
 }
 
 impl Material for Lambertian {
-    fn scatter(
-        &self,
-        _ray: &Ray,
-        hit: &Hit<impl Material>,
-        rng: &mut ThreadRng,
-    ) -> Option<(Ray, Color)> {
+    fn scatter(&self, _ray: &Ray, hit: &Hit, rng: &mut ThreadRng) -> Option<(Ray, Color)> {
         // Alternative diffusion with Vec3::random_in_hemisphere is a bit faster
         let mut scatter_direction = hit.normal + Vec3::random_unit_vector(rng);
         // Catch degenerate scatter direction (->0)

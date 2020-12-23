@@ -112,6 +112,10 @@ impl Vec3<f32> {
         let eps = 1e-8;
         self.x().abs() < eps && self.y().abs() < eps && self.z().abs() < eps
     }
+
+    pub fn reflect(&self, normal: &Vec3<f32>) -> Vec3<f32> {
+        *self - 2.0 * self.dot(normal) * *normal
+    }
 }
 
 impl<T> Display for Vec3<T>

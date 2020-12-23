@@ -2,17 +2,14 @@ use crate::rays::*;
 use crate::vectors::*;
 use crate::{hit::*, materials::Material};
 
-pub struct Sphere<'a, T> {
+pub struct Sphere<'a> {
     pub center: Point3<f32>,
     pub radius: f32,
-    pub material: &'a T,
+    pub material: &'a dyn Material,
 }
 
-impl<'a, T> Hittable<T> for Sphere<'a, T>
-where
-    T: Material,
-{
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit<T>> {
+impl<'a> Hittable for Sphere<'a> {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let oc: Vec3<f32> = ray.origin() - self.center;
         let a = ray.direction().norm_sqr();
         let half_b = oc.dot(&ray.direction());
