@@ -75,12 +75,20 @@ fn main() {
     scene.add(&crystal_ball);
 
     // Camera
+    let lookfrom = Point3::new(3.0, 3.0, 2.0);
+    let lookat = Point3::new(0.0, 0.0, -1.0);
+    let focus_distance = (lookfrom - lookat).norm();
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let aperture = 2.0;
+
     let camera = Camera::new(
-        Point3::new(-2.0, 2.0, 1.0),
-        Point3::new(0.0, 0.0, -1.0),
-        Vec3::new(0.0, 1.0, 0.0),
+        lookfrom,
+        lookat,
+        vup,
         20.0,
         ASPECT_RATIO,
+        aperture,
+        focus_distance,
     );
 
     // Progress bar init
@@ -100,7 +108,7 @@ fn main() {
                 let u = (x as f32 + rng.gen::<f32>()) / (WIDTH - 1) as f32;
                 let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
 
-                let ray = camera.get_ray(u, v);
+                let ray = camera.get_ray(u, v, &mut rng);
                 color += raytrace(ray, &scene, MAX_DEPTH, &mut rng);
             }
 

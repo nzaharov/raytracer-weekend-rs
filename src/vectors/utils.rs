@@ -108,6 +108,15 @@ impl Vec3<f32> {
         -in_unit_sphere
     }
 
+    pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Self {
+        loop {
+            let p = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0);
+            if p.norm_sqr() < 1.0 {
+                return p;
+            }
+        }
+    }
+
     pub fn is_near_zero(&self) -> bool {
         let eps = 1e-8;
         self.x().abs() < eps && self.y().abs() < eps && self.z().abs() < eps
