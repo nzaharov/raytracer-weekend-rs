@@ -44,7 +44,7 @@ fn main() {
         radius: 0.5,
         material: &mat_1,
     };
-    let mat_ground = Lambertian::new(Color::new(0.7, 0.3, 0.3));
+    let mat_ground = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5);
     let ground = Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
@@ -56,7 +56,7 @@ fn main() {
         radius: 0.5,
         material: &mat_2,
     };
-    let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8));
+    let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8), 0.0);
     let metal = Sphere {
         center: Point3::new(-2.0, 0.0, -1.5),
         radius: 0.5,
@@ -151,7 +151,7 @@ fn raytrace(ray: Ray, scene: &HitList, depth: u32, rng: &mut ThreadRng) -> Color
 }
 
 // temporary implementation until the stabilized clamp is released
-fn clamp(x: f32, min: f32, max: f32) -> f32 {
+pub fn clamp(x: f32, min: f32, max: f32) -> f32 {
     if x < min {
         return min;
     }
