@@ -22,7 +22,7 @@ const FILENAME: &str = "output/test.png";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const SAMPLE_SIZE: u32 = 100;
 const MAX_DEPTH: u32 = 50;
-const BIAS: f32 = 0.1;
+const BIAS: f32 = 0.001;
 
 fn main() {
     let mut rng = thread_rng();
