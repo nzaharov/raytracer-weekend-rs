@@ -87,25 +87,30 @@ impl Vec3<f32> {
         )
     }
 
-    pub fn random_in_unit_sphere(mut rng: &mut ThreadRng) -> Self {
+    pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Self {
         loop {
-            let p = Vec3::new_random(&mut rng, -1.0, 1.0);
+            let p = Vec3::new_random(rng, -1.0, 1.0);
             if p.norm_sqr() < 1.0 {
                 return p;
             }
         }
     }
 
-    pub fn random_unit_vector(mut rng: &mut ThreadRng) -> Self {
-        Self::random_in_unit_sphere(&mut rng).unit_vector()
+    pub fn random_unit_vector(rng: &mut ThreadRng) -> Self {
+        Self::random_in_unit_sphere(rng).unit_vector()
     }
 
-    pub fn random_in_hemisphere(mut rng: &mut ThreadRng, normal: &Vec3<f32>) -> Self {
-        let in_unit_sphere = Self::random_in_unit_sphere(&mut rng);
+    pub fn random_in_hemisphere(rng: &mut ThreadRng, normal: &Vec3<f32>) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere(rng);
         if normal.dot(&in_unit_sphere) > 0.0 {
             return in_unit_sphere;
         }
         -in_unit_sphere
+    }
+
+    pub fn is_near_zero(&self) -> bool {
+        let eps = 1e-8;
+        self.x().abs() < eps && self.y().abs() < eps && self.z().abs() < eps
     }
 }
 

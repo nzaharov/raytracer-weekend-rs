@@ -1,6 +1,7 @@
 #![warn(clippy::all)]
 mod camera;
 mod hit;
+mod materials;
 mod objects;
 mod rays;
 mod vectors;
@@ -11,6 +12,7 @@ use camera::Camera;
 use hit::{HitList, Hittable};
 use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
+use materials::{lambertian::Lambertian, Material};
 use objects::sphere::Sphere;
 use rand::{prelude::ThreadRng, thread_rng, Rng};
 use rays::{Color, Ray};
@@ -20,7 +22,7 @@ const FILENAME: &str = "output/test.png";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const SAMPLE_SIZE: u32 = 100;
 const MAX_DEPTH: u32 = 50;
-const BIAS: f32 = 0.2;
+const BIAS: f32 = 0.1;
 
 fn main() {
     let mut rng = thread_rng();
@@ -35,17 +37,29 @@ fn main() {
 
     // Scene
     let mut scene = HitList::new();
+    let first = Lambertian {
+        albedo: Color::new(0.8, 0.8, 0.0),
+    };
+    let ground = Lambertian {
+        albedo: Color::new(0.7, 0.3, 0.3),
+    };
+    let second = Lambertian {
+        albedo: Color::default(),
+    };
     let sphere1 = Sphere {
         center: Point3::new(0.0, 0.0, -1.0),
         radius: 0.5,
+        material: &first,
     };
     let sphere2 = Sphere {
         center: Point3::new(0.0, -100.5, -1.0),
         radius: 100.0,
+        material: &ground,
     };
     let sphere3 = Sphere {
         center: Point3::new(1.0, 0.0, -2.0),
         radius: 0.5,
+        material: &second,
     };
     scene.add(&sphere1);
     scene.add(&sphere2);
@@ -106,12 +120,15 @@ fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
     ])
 }
 
-fn raytrace(
+fn raytrace<T>(
     ray: Ray,
-    scene: &HitList<impl Hittable>,
+    scene: &HitList<impl Hittable<T>, T>,
     depth: u32,
-    mut rng: &mut ThreadRng,
-) -> Color {
+    rng: &mut ThreadRng,
+) -> Color
+where
+    T: Material,
+{
     // Color map
     // if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
     //     return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
@@ -123,11 +140,12 @@ fn raytrace(
     }
 
     if let Some(hit) = scene.hit(&ray, 0.0 + BIAS, INFINITY) {
-        let target: Point3<f32> =
-            hit.point + hit.normal + Vec3::random_in_hemisphere(&mut rng, &hit.normal);
-        let child_ray = Ray::new(hit.point, target - hit.point);
-
-        return raytrace(child_ray, scene, depth - 1, &mut rng);
+        return match hit.material.scatter(&ray, &hit, rng) {
+            Some((scattered_ray, attenuatuion)) => {
+                attenuatuion * raytrace(scattered_ray, scene, depth - 1, rng)
+            }
+            None => Color::default(),
+        };
     }
 
     let unit_direction = ray.direction().unit_vector();
