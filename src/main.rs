@@ -59,7 +59,7 @@ fn main() {
     let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8));
     let metal = Sphere {
         center: Point3::new(-2.0, 0.0, -1.5),
-        radius: 100.0,
+        radius: 0.5,
         material: &mat_metal,
     };
     scene.add(&sphere1);
