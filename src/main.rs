@@ -108,7 +108,7 @@ fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
     let scale = 1.0 / sample_size as f32;
     let (r, g, b) = (color.x(), color.y(), color.z());
 
-    // Gamma correction (gamma=2.0)
+    // Color correction (gamma=2.0)
     let r = (scale * r).sqrt();
     let g = (scale * g).sqrt();
     let b = (scale * b).sqrt();
@@ -129,12 +129,11 @@ fn raytrace<T>(
 where
     T: Material,
 {
-    // Color map
+    // Color map (TODO: extract as material)
     // if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
     //     return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
     // }
 
-    // Diffusion
     if depth == 0 {
         return Color::default();
     }
@@ -148,6 +147,7 @@ where
         };
     }
 
+    // Background sky gradient
     let unit_direction = ray.direction().unit_vector();
     let t = 0.5 * (unit_direction.y() + 1.0);
     let start_value = Color::new(1.0, 1.0, 1.0);
