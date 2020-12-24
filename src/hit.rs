@@ -1,20 +1,20 @@
 use crate::vectors::{Point3, Vec3};
 use crate::{materials::Material, rays::Ray};
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct Hit {
     pub point: Point3<f32>,
     pub normal: Vec3<f32>,
     pub t: f32,
     pub is_front_facing: bool,
-    pub material: Rc<dyn Material>,
+    pub material: Arc<dyn Material>,
 }
 
 impl Hit {
     pub fn new(
         point: Point3<f32>,
         t: f32,
-        material: Rc<dyn Material>,
+        material: Arc<dyn Material>,
         ray: &Ray,
         outward_normal: &Vec3<f32>,
     ) -> Self {
@@ -38,14 +38,18 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit>;
 }
 
-pub struct HitList(Vec<Rc<dyn Hittable>>);
+pub struct HitList(Vec<Arc<dyn Hittable>>);
+
+unsafe impl Send for HitList {}
+
+unsafe impl Sync for HitList {}
 
 impl HitList {
     pub fn new() -> Self {
         Self(Vec::new())
     }
 
-    pub fn add(&mut self, obj: Rc<dyn Hittable>) {
+    pub fn add(&mut self, obj: Arc<dyn Hittable>) {
         self.0.push(obj);
     }
 

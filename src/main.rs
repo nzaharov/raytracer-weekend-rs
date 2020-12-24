@@ -6,8 +6,9 @@ mod objects;
 mod rays;
 mod vectors;
 
-use std::f32::INFINITY;
-use std::rc::Rc;
+use indicatif::MultiProgress;
+use std::sync::Arc;
+use std::{f32::INFINITY, sync::mpsc, thread};
 
 use camera::Camera;
 use hit::{HitList, Hittable};
@@ -24,6 +25,8 @@ const ASPECT_RATIO: f32 = 3.0 / 2.0;
 const SAMPLE_SIZE: u32 = 500;
 const MAX_DEPTH: u32 = 50;
 const BIAS: f32 = 0.001;
+
+const THREADS: usize = 12;
 
 fn main() {
     // Start timer
@@ -55,36 +58,74 @@ fn main() {
         focus_distance,
     );
 
+    // Chunks
+    println!("Preparing chunks...");
+    let chunks = (0..HEIGHT)
+        .collect::<Vec<u32>>()
+        .iter()
+        .map(|h| (0..WIDTH).map(|w| (*h, w)).collect::<Vec<(u32, u32)>>())
+        .enumerate()
+        .fold(vec![Vec::new(); THREADS], |mut acc, (i, band)| {
+            acc.get_mut(i % THREADS).unwrap().extend(band);
+            acc
+        });
+    println!("Chunks prepared!");
+
     // Progress bar init
-    let progress = ProgressBar::new(HEIGHT.into());
-    progress.set_style(
-        ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] {bar:80.white/white} {pos:>7}/{len:7} {msg}"),
-    );
+    let multibar = MultiProgress::new();
+    let style = ProgressStyle::default_bar()
+        .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+        .progress_chars("##-");
 
-    println!("\nProcessing lines...\n");
+    println!("\nStarting workers...\n");
 
-    let mut rng = thread_rng();
+    let (tx, rx) = mpsc::channel::<Vec<(u32, u32, image::Rgb<u8>)>>();
 
-    for y in (0..HEIGHT).rev() {
-        progress.inc(1);
-        for x in 0..WIDTH {
-            let mut color = Color::default();
-            for _ in 0..SAMPLE_SIZE {
-                let u = (x as f32 + rng.gen::<f32>()) / (WIDTH - 1) as f32;
-                let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
+    let scene_arc = Arc::new(scene);
+    let tx_arc = Arc::new(tx);
+    for (_, chunk) in chunks.into_iter().enumerate() {
+        let scene_arc = scene_arc.clone();
+        let sender = mpsc::Sender::clone(&tx_arc);
 
-                let ray = camera.get_ray(u, v);
-                color += raytrace(ray, &scene, MAX_DEPTH);
-            }
+        let progress = multibar.add(ProgressBar::new(chunk.len() as u64));
+        progress.set_style(style.clone());
 
-            let color = calculate_pixel_color(color, SAMPLE_SIZE);
+        thread::spawn(move || {
+            let mut rng = thread_rng();
+            let pixels = chunk
+                .into_iter()
+                .map(|(y, x)| {
+                    progress.inc(1);
 
-            img.put_pixel(x, HEIGHT - 1 - y, color);
+                    let mut color = Color::default();
+                    for _ in 0..SAMPLE_SIZE {
+                        let u = (x as f32 + rng.gen::<f32>()) / (WIDTH - 1) as f32;
+                        let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
+
+                        let ray = camera.get_ray(u, v);
+                        color += raytrace(ray, &scene_arc, MAX_DEPTH);
+                    }
+
+                    let color = calculate_pixel_color(color, SAMPLE_SIZE);
+
+                    (x, HEIGHT - 1 - y, color)
+                })
+                .collect();
+
+            sender.send(pixels).unwrap();
+            progress.finish_with_message("Done!");
+            drop(sender);
+        });
+    }
+    drop(tx_arc);
+
+    multibar.join().unwrap();
+
+    for pixels in rx {
+        for pixel in pixels {
+            img.put_pixel(pixel.0, pixel.1, pixel.2);
         }
     }
-
-    progress.finish_with_message("Done!");
 
     println!("\nSaving image...");
 
@@ -110,11 +151,6 @@ fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
 }
 
 fn raytrace(ray: Ray, scene: &HitList, depth: u32) -> Color {
-    // Color map (TODO: extract as material)
-    // if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
-    //     return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
-    // }
-
     if depth == 0 {
         return Color::default();
     }
@@ -145,9 +181,9 @@ fn generate_random_scene() -> HitList {
     let ground = Sphere {
         center: Point3::new(0.0, -1000.0, 0.0),
         radius: 1000.0,
-        material: Rc::new(ground_mat),
+        material: Arc::new(ground_mat),
     };
-    scene.add(Rc::new(ground));
+    scene.add(Arc::new(ground));
 
     for i in -11..11 {
         for j in -11..11 {
@@ -160,16 +196,16 @@ fn generate_random_scene() -> HitList {
             );
 
             if (center - Point3::new(4.0, 2.0, 0.0)).norm() > 0.9 {
-                let material: Rc<dyn Material>;
+                let material: Arc<dyn Material>;
                 if random < 0.8 {
                     let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
-                    material = Rc::new(Lambertian::new(albedo));
+                    material = Arc::new(Lambertian::new(albedo));
                 } else if random < 0.95 {
                     let albedo = Color::new_random(0.5, 1.0);
                     let fuzz = rng.gen_range(0.0..0.5);
-                    material = Rc::new(Metal::new(albedo, fuzz));
+                    material = Arc::new(Metal::new(albedo, fuzz));
                 } else {
-                    material = Rc::new(Dielectric::new(1.5));
+                    material = Arc::new(Dielectric::new(1.5));
                 }
 
                 let sphere = Sphere {
@@ -177,7 +213,7 @@ fn generate_random_scene() -> HitList {
                     radius: 0.2,
                     material,
                 };
-                scene.add(Rc::new(sphere));
+                scene.add(Arc::new(sphere));
             }
         }
     }
@@ -185,22 +221,22 @@ fn generate_random_scene() -> HitList {
     let big1 = Sphere {
         center: Point3::new(0.0, 1.0, 0.0),
         radius: 1.0,
-        material: Rc::new(Dielectric::new(1.5)),
+        material: Arc::new(Dielectric::new(1.5)),
     };
     let big2 = Sphere {
         center: Point3::new(-4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Rc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1))),
+        material: Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1))),
     };
     let big3 = Sphere {
         center: Point3::new(4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Rc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0)),
+        material: Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0)),
     };
 
-    scene.add(Rc::new(big1));
-    scene.add(Rc::new(big2));
-    scene.add(Rc::new(big3));
+    scene.add(Arc::new(big1));
+    scene.add(Arc::new(big2));
+    scene.add(Arc::new(big3));
 
     scene
 }
