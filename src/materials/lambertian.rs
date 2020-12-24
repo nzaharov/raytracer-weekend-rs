@@ -15,7 +15,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _ray: &Ray, hit: &Hit) -> Option<(Ray, Color)> {
+    fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)> {
         // Alternative diffusion with Vec3::random_in_hemisphere is a bit faster
         let mut scatter_direction = hit.normal + Vec3::random_unit_vector();
         // Catch degenerate scatter direction (->0)
@@ -23,7 +23,7 @@ impl Material for Lambertian {
             scatter_direction = hit.normal;
         }
 
-        let scattered_ray = Ray::new(hit.point, scatter_direction);
+        let scattered_ray = Ray::new(hit.point, scatter_direction, ray.time());
 
         Some((scattered_ray, self.albedo))
     }

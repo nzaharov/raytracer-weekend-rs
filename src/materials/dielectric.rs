@@ -37,7 +37,8 @@ impl Material for Dielectric {
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let should_reflect = Self::get_reflectance(cos_theta, refraction_ratio) > thread_rng().gen();
+        let should_reflect =
+            Self::get_reflectance(cos_theta, refraction_ratio) > thread_rng().gen();
 
         let direction = if cannot_refract || should_reflect {
             unit_direction.reflect(&hit.normal)
@@ -45,7 +46,7 @@ impl Material for Dielectric {
             unit_direction.refract(&hit.normal, refraction_ratio)
         };
 
-        let scattered_ray = Ray::new(hit.point, direction);
+        let scattered_ray = Ray::new(hit.point, direction, ray.time());
 
         Some((scattered_ray, attenuation))
     }

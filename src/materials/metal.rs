@@ -26,7 +26,7 @@ impl Material for Metal {
         } else {
             self.fuzz * Vec3::random_in_unit_sphere()
         };
-        let scattered_ray = Ray::new(hit.point, reflected + fuzz);
+        let scattered_ray = Ray::new(hit.point, reflected + fuzz, ray.time());
 
         Some((scattered_ray, self.albedo))
     }

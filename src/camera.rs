@@ -1,3 +1,5 @@
+use rand::{thread_rng, Rng};
+
 use crate::rays::Ray;
 use crate::vectors::{Point3, Vec3};
 
@@ -11,6 +13,8 @@ pub struct Camera {
     u: Vec3<f32>,
     v: Vec3<f32>,
     lens_radius: f32,
+    shutter_open_time: f32,
+    shutter_close_time: f32,
 }
 
 impl Camera {
@@ -46,7 +50,14 @@ impl Camera {
             u,
             v,
             lens_radius: aperature / 2.0,
+            shutter_open_time: 0.0,
+            shutter_close_time: 1.0,
         }
+    }
+
+    pub fn set_shutter_open_close_time(&mut self, shutter_open_time: f32, shutter_close_time: f32) {
+        self.shutter_open_time = shutter_open_time;
+        self.shutter_close_time = shutter_close_time;
     }
 
     pub fn get_ray(&self, s: f32, t: f32) -> Ray {
@@ -56,6 +67,8 @@ impl Camera {
         let origin = self.origin + offset;
         let direction = self.lower_left_corner + s * self.horizontal + t * self.vertical - origin;
 
-        Ray::new(origin, direction)
+        let time = thread_rng().gen_range(self.shutter_open_time..self.shutter_close_time);
+
+        Ray::new(origin, direction, time)
     }
 }

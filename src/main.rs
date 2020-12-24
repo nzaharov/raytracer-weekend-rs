@@ -15,14 +15,14 @@ use hit::{HitList, Hittable};
 use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
 use materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal, Material};
-use objects::sphere::Sphere;
+use objects::{moving_sphere::MovingSphere, sphere::Sphere};
 use rand::{thread_rng, Rng};
 use rays::{Color, Ray};
 use vectors::{Point3, Vec3};
 
 const FILENAME: &str = "output/test.png";
-const ASPECT_RATIO: f32 = 3.0 / 2.0;
-const SAMPLE_SIZE: u32 = 500;
+const ASPECT_RATIO: f32 = 16.0 / 9.0;
+const SAMPLE_SIZE: u32 = 100;
 const MAX_DEPTH: u32 = 50;
 const BIAS: f32 = 0.001;
 
@@ -33,7 +33,7 @@ fn main() {
     let now = std::time::Instant::now();
 
     // Image
-    const WIDTH: u32 = 1200;
+    const WIDTH: u32 = 640;
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
@@ -196,24 +196,39 @@ fn generate_random_scene() -> HitList {
             );
 
             if (center - Point3::new(4.0, 2.0, 0.0)).norm() > 0.9 {
-                let material: Arc<dyn Material>;
                 if random < 0.8 {
                     let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
-                    material = Arc::new(Lambertian::new(albedo));
+                    let material = Arc::new(Lambertian::new(albedo));
+                    let center_end: Point3<f32> =
+                        center + Vec3::new(0.0, rng.gen(), 0.0);
+                    let sphere = MovingSphere {
+                        center_start: center,
+                        center_end,
+                        time_start: 0.0,
+                        time_end: 1.0,
+                        radius: 0.2,
+                        material,
+                    };
+                    scene.add(Arc::new(sphere));
                 } else if random < 0.95 {
                     let albedo = Color::new_random(0.5, 1.0);
                     let fuzz = rng.gen_range(0.0..0.5);
-                    material = Arc::new(Metal::new(albedo, fuzz));
+                    let material = Arc::new(Metal::new(albedo, fuzz));
+                    let sphere = Sphere {
+                        center,
+                        radius: 0.2,
+                        material,
+                    };
+                    scene.add(Arc::new(sphere));
                 } else {
-                    material = Arc::new(Dielectric::new(1.5));
+                    let material = Arc::new(Dielectric::new(1.5));
+                    let sphere = Sphere {
+                        center,
+                        radius: 0.2,
+                        material,
+                    };
+                    scene.add(Arc::new(sphere));
                 }
-
-                let sphere = Sphere {
-                    center,
-                    radius: 0.2,
-                    material,
-                };
-                scene.add(Arc::new(sphere));
             }
         }
     }
