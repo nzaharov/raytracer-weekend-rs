@@ -7,6 +7,7 @@ mod rays;
 mod vectors;
 
 use std::f32::INFINITY;
+use std::rc::Rc;
 
 use camera::Camera;
 use hit::{HitList, Hittable};
@@ -14,72 +15,35 @@ use image::{Rgb, RgbImage};
 use indicatif::{ProgressBar, ProgressStyle};
 use materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal, Material};
 use objects::sphere::Sphere;
-use rand::{prelude::ThreadRng, thread_rng, Rng};
+use rand::{thread_rng, Rng};
 use rays::{Color, Ray};
 use vectors::{Point3, Vec3};
 
 const FILENAME: &str = "output/test.png";
-const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const SAMPLE_SIZE: u32 = 100;
+const ASPECT_RATIO: f32 = 3.0 / 2.0;
+const SAMPLE_SIZE: u32 = 500;
 const MAX_DEPTH: u32 = 50;
 const BIAS: f32 = 0.001;
 
 fn main() {
-    let mut rng = thread_rng();
     // Start timer
     let now = std::time::Instant::now();
 
     // Image
-    const WIDTH: u32 = 400;
+    const WIDTH: u32 = 1200;
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
 
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
     // Scene
-    let mut scene = HitList::new();
-
-    let mat_1 = Lambertian::new(Color::new(0.8, 0.8, 0.0));
-    let sphere1 = Sphere {
-        center: Point3::new(0.0, 0.0, -1.0),
-        radius: 0.5,
-        material: &mat_1,
-    };
-    let mat_ground = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5);
-    let ground = Sphere {
-        center: Point3::new(0.0, -100.5, -1.0),
-        radius: 100.0,
-        material: &mat_ground,
-    };
-    let mat_2 = Lambertian::new(Color::default());
-    let sphere2 = Sphere {
-        center: Point3::new(1.0, 0.0, -2.0),
-        radius: 0.5,
-        material: &mat_2,
-    };
-    let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8), 0.0);
-    let metal = Sphere {
-        center: Point3::new(-2.0, 0.0, -1.5),
-        radius: 0.5,
-        material: &mat_metal,
-    };
-    let glass_mat = Dielectric::new(1.5);
-    let crystal_ball = Sphere {
-        center: Point3::new(0.27, 0.1, -0.5),
-        radius: -0.05,
-        material: &glass_mat,
-    };
-    scene.add(&sphere1);
-    scene.add(&ground);
-    scene.add(&sphere2);
-    scene.add(&metal);
-    scene.add(&crystal_ball);
+    let scene = generate_random_scene();
 
     // Camera
-    let lookfrom = Point3::new(3.0, 3.0, 2.0);
-    let lookat = Point3::new(0.0, 0.0, -1.0);
-    let focus_distance = (lookfrom - lookat).norm();
+    let lookfrom = Point3::new(13.0, 2.0, 3.0);
+    let lookat = Point3::new(0.0, 0.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let aperture = 2.0;
+    let focus_distance = 10.0;
+    let aperture = 0.1;
 
     let camera = Camera::new(
         lookfrom,
@@ -100,6 +64,8 @@ fn main() {
 
     println!("\nProcessing lines...\n");
 
+    let mut rng = thread_rng();
+
     for y in (0..HEIGHT).rev() {
         progress.inc(1);
         for x in 0..WIDTH {
@@ -108,8 +74,8 @@ fn main() {
                 let u = (x as f32 + rng.gen::<f32>()) / (WIDTH - 1) as f32;
                 let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
 
-                let ray = camera.get_ray(u, v, &mut rng);
-                color += raytrace(ray, &scene, MAX_DEPTH, &mut rng);
+                let ray = camera.get_ray(u, v);
+                color += raytrace(ray, &scene, MAX_DEPTH);
             }
 
             let color = calculate_pixel_color(color, SAMPLE_SIZE);
@@ -143,7 +109,7 @@ fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
     ])
 }
 
-fn raytrace(ray: Ray, scene: &HitList, depth: u32, rng: &mut ThreadRng) -> Color {
+fn raytrace(ray: Ray, scene: &HitList, depth: u32) -> Color {
     // Color map (TODO: extract as material)
     // if let Some(hit) = scene.hit(&ray, 0.0, INFINITY) {
     //     return 0.5 * (hit.normal + Color::new(1.0, 1.0, 1.0));
@@ -154,9 +120,9 @@ fn raytrace(ray: Ray, scene: &HitList, depth: u32, rng: &mut ThreadRng) -> Color
     }
 
     if let Some(hit) = scene.hit(&ray, 0.0 + BIAS, INFINITY) {
-        return match hit.material.scatter(&ray, &hit, rng) {
+        return match hit.material.scatter(&ray, &hit) {
             Some((scattered_ray, attenuatuion)) => {
-                attenuatuion * raytrace(scattered_ray, scene, depth - 1, rng)
+                attenuatuion * raytrace(scattered_ray, scene, depth - 1)
             }
             None => Color::default(),
         };
@@ -169,6 +135,74 @@ fn raytrace(ray: Ray, scene: &HitList, depth: u32, rng: &mut ThreadRng) -> Color
     let end_value = Color::new(0.5, 0.7, 1.0);
 
     (1.0 - t) * start_value + t * end_value
+}
+
+fn generate_random_scene() -> HitList {
+    let mut rng = thread_rng();
+    let mut scene = HitList::new();
+
+    let ground_mat = Lambertian::new(Color::new(0.5, 0.5, 0.5));
+    let ground = Sphere {
+        center: Point3::new(0.0, -1000.0, 0.0),
+        radius: 1000.0,
+        material: Rc::new(ground_mat),
+    };
+    scene.add(Rc::new(ground));
+
+    for i in -11..11 {
+        for j in -11..11 {
+            let random: f32 = rng.gen();
+
+            let center = Point3::new(
+                i as f32 + 0.9 * rng.gen::<f32>(),
+                0.2,
+                j as f32 + 0.9 * rng.gen::<f32>(),
+            );
+
+            if (center - Point3::new(4.0, 2.0, 0.0)).norm() > 0.9 {
+                let material: Rc<dyn Material>;
+                if random < 0.8 {
+                    let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
+                    material = Rc::new(Lambertian::new(albedo));
+                } else if random < 0.95 {
+                    let albedo = Color::new_random(0.5, 1.0);
+                    let fuzz = rng.gen_range(0.0..0.5);
+                    material = Rc::new(Metal::new(albedo, fuzz));
+                } else {
+                    material = Rc::new(Dielectric::new(1.5));
+                }
+
+                let sphere = Sphere {
+                    center,
+                    radius: 0.2,
+                    material,
+                };
+                scene.add(Rc::new(sphere));
+            }
+        }
+    }
+
+    let big1 = Sphere {
+        center: Point3::new(0.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Rc::new(Dielectric::new(1.5)),
+    };
+    let big2 = Sphere {
+        center: Point3::new(-4.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Rc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1))),
+    };
+    let big3 = Sphere {
+        center: Point3::new(4.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Rc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0)),
+    };
+
+    scene.add(Rc::new(big1));
+    scene.add(Rc::new(big2));
+    scene.add(Rc::new(big3));
+
+    scene
 }
 
 // temporary implementation until the stabilized clamp is released

@@ -1,4 +1,4 @@
-use rand::prelude::{Rng, ThreadRng};
+use rand::{prelude::Rng, thread_rng};
 
 use super::Vec3;
 use std::{
@@ -79,7 +79,8 @@ impl Vec3<f32> {
         )
     }
 
-    pub fn new_random(rng: &mut ThreadRng, min: f32, max: f32) -> Self {
+    pub fn new_random(min: f32, max: f32) -> Self {
+        let mut rng = thread_rng();
         Self::new(
             rng.gen_range(min..max),
             rng.gen_range(min..max),
@@ -87,28 +88,29 @@ impl Vec3<f32> {
         )
     }
 
-    pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Self {
+    pub fn random_in_unit_sphere() -> Self {
         loop {
-            let p = Vec3::new_random(rng, -1.0, 1.0);
+            let p = Vec3::new_random(-1.0, 1.0);
             if p.norm_sqr() < 1.0 {
                 return p;
             }
         }
     }
 
-    pub fn random_unit_vector(rng: &mut ThreadRng) -> Self {
-        Self::random_in_unit_sphere(rng).unit_vector()
+    pub fn random_unit_vector() -> Self {
+        Self::random_in_unit_sphere().unit_vector()
     }
 
-    pub fn random_in_hemisphere(rng: &mut ThreadRng, normal: &Vec3<f32>) -> Self {
-        let in_unit_sphere = Self::random_in_unit_sphere(rng);
+    pub fn random_in_hemisphere(normal: &Vec3<f32>) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere();
         if normal.dot(&in_unit_sphere) > 0.0 {
             return in_unit_sphere;
         }
         -in_unit_sphere
     }
 
-    pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Self {
+    pub fn random_in_unit_disk() -> Self {
+        let mut rng = thread_rng();
         loop {
             let p = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0);
             if p.norm_sqr() < 1.0 {

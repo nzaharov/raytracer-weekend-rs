@@ -1,9 +1,10 @@
+use rand::thread_rng;
+
 use crate::materials::Hit;
 use crate::Color;
 use crate::Material;
 use crate::Ray;
 use crate::Rng;
-use crate::ThreadRng;
 
 pub struct Dielectric {
     refractive_index: f32,
@@ -24,7 +25,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, ray: &Ray, hit: &Hit, rng: &mut ThreadRng) -> Option<(Ray, Color)> {
+    fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let refraction_ratio = if hit.is_front_facing {
             1.0 / self.refractive_index
@@ -36,7 +37,7 @@ impl Material for Dielectric {
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let should_reflect = Self::get_reflectance(cos_theta, refraction_ratio) > rng.gen();
+        let should_reflect = Self::get_reflectance(cos_theta, refraction_ratio) > thread_rng().gen();
 
         let direction = if cannot_refract || should_reflect {
             unit_direction.reflect(&hit.normal)
