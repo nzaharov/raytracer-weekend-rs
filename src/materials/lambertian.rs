@@ -4,7 +4,6 @@ use crate::Material;
 use crate::Ray;
 use crate::Vec3;
 
-#[derive(Clone, Copy)]
 pub struct Lambertian {
     albedo: Color,
 }
