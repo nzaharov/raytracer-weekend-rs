@@ -1,0 +1,84 @@
+use raytracer::{
+    camera::Camera,
+    hit::HitList,
+    materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
+    objects::sphere::Sphere,
+    rays::Color,
+    vectors::{Point3, Vec3},
+    Raytracer,
+};
+use std::{sync::Arc, time::Instant};
+
+const FILENAME: &str = "output/test.png";
+const ASPECT_RATIO: f32 = 16.0 / 9.0;
+const SAMPLE_SIZE: u32 = 500;
+
+fn main() {
+    let now = Instant::now();
+
+    // Dimensions
+    const WIDTH: u32 = 1920;
+    const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
+
+    // Camera
+    let lookfrom = Point3::new(0.0, 0.0, 0.0);
+    let lookat = Point3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let focus_distance = 0.5;
+    let aperture = 0.01;
+
+    let camera = Camera::new(
+        lookfrom,
+        lookat,
+        vup,
+        75.0,
+        ASPECT_RATIO,
+        aperture,
+        focus_distance,
+    );
+
+    // Scene
+    let mut scene = HitList::new();
+
+    let mat_1 = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let sphere1 = Sphere {
+        center: Point3::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Arc::new(mat_1),
+    };
+    let mat_ground = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5);
+    let ground = Sphere {
+        center: Point3::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+        material: Arc::new(mat_ground),
+    };
+    let mat_2 = Lambertian::new(Color::default());
+    let sphere2 = Sphere {
+        center: Point3::new(1.0, 0.0, -2.0),
+        radius: 0.5,
+        material: Arc::new(mat_2),
+    };
+    let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8), 0.0);
+    let metal = Sphere {
+        center: Point3::new(-2.0, 0.0, -1.5),
+        radius: 0.5,
+        material: Arc::new(mat_metal),
+    };
+    let glass_mat = Dielectric::new(1.5);
+    let crystal_ball = Sphere {
+        center: Point3::new(0.27, 0.1, -0.5),
+        radius: -0.05,
+        material: Arc::new(glass_mat),
+    };
+    scene.add(Arc::new(sphere1));
+    scene.add(Arc::new(ground));
+    scene.add(Arc::new(sphere2));
+    scene.add(Arc::new(metal));
+    scene.add(Arc::new(crystal_ball));
+
+    let raytracer = Raytracer::new(WIDTH, HEIGHT, camera, SAMPLE_SIZE);
+
+    raytracer.render(scene, &FILENAME);
+
+    println!("Finished in {} ms", now.elapsed().as_millis());
+}
