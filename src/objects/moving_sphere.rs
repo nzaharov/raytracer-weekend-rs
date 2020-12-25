@@ -1,3 +1,4 @@
+use crate::aabb::AAAB;
 use crate::hit::Hit;
 use crate::Arc;
 use crate::Hittable;
@@ -54,5 +55,18 @@ impl Hittable for MovingSphere {
         );
 
         Some(hit)
+    }
+
+    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB> {
+        let box0 = AAAB::new(
+            self.center_at(time0) - Vec3::new(self.radius, self.radius, self.radius),
+            self.center_at(time0) + Vec3::new(self.radius, self.radius, self.radius),
+        );
+        let box1 = AAAB::new(
+            self.center_at(time1) - Vec3::new(self.radius, self.radius, self.radius),
+            self.center_at(time1) + Vec3::new(self.radius, self.radius, self.radius),
+        );
+
+        Some(AAAB::new_surrounding_box(box0, box1))
     }
 }

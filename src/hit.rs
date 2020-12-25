@@ -1,5 +1,9 @@
-use crate::vectors::{Point3, Vec3};
+use crate::{
+    aabb::AAAB,
+    vectors::{Point3, Vec3},
+};
 use crate::{materials::Material, rays::Ray};
+use core::cmp::Ordering;
 use std::sync::Arc;
 
 pub struct Hit {
@@ -36,6 +40,8 @@ impl Hit {
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit>;
+
+    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB>;
 }
 
 pub struct HitList(Vec<Arc<dyn Hittable>>);
@@ -56,6 +62,29 @@ impl HitList {
     pub fn clear(&mut self) {
         self.0.clear();
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<Arc<dyn Hittable>> {
+        self.0.iter()
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn get(&self, index: usize) -> Option<&Arc<dyn Hittable>> {
+        self.0.get(index)
+    }
+
+    pub fn sort_by<F>(&mut self, compare: F)
+    where
+        F: FnMut(&Arc<dyn Hittable>, &Arc<dyn Hittable>) -> Ordering,
+    {
+        self.0.sort_by(compare);
+    }
 }
 
 impl Hittable for HitList {
@@ -71,5 +100,26 @@ impl Hittable for HitList {
         }
 
         current_hit
+    }
+
+    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB> {
+        if self.is_empty() {
+            return None;
+        }
+
+        let mut curr_box = None;
+
+        for object in self.iter() {
+            if let Some(b_box) = object.get_b_box(time0, time1) {
+                curr_box = match curr_box {
+                    Some(curr) => Some(AAAB::new_surrounding_box(b_box, curr)),
+                    None => Some(b_box),
+                };
+            } else {
+                return None;
+            }
+        }
+
+        curr_box
     }
 }

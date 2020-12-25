@@ -1,3 +1,4 @@
+use crate::aabb::AAAB;
 use crate::{
     hit::{Hit, Hittable},
     materials::Material,
@@ -35,5 +36,9 @@ impl Hittable for Plane {
             &ray,
             &self.normal,
         ))
+    }
+
+    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {
+        Some(AAAB::new(self.p1, self.p1))
     }
 }

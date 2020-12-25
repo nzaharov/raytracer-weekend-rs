@@ -26,6 +26,15 @@ where
     pub fn z(&self) -> T {
         self.2
     }
+
+    pub fn get(&self, dim: u32) -> Option<T> {
+        match dim {
+            0 => self.0.into(),
+            1 => self.1.into(),
+            2 => self.2.into(),
+            _ => None,
+        }
+    }
 }
 
 impl Default for Vec3<f32> {

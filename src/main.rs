@@ -1,4 +1,6 @@
 #![warn(clippy::all)]
+mod aabb;
+mod bvh;
 mod camera;
 mod hit;
 mod materials;
@@ -6,6 +8,7 @@ mod objects;
 mod rays;
 mod vectors;
 
+use bvh::BVHNode;
 use indicatif::MultiProgress;
 use std::sync::Arc;
 use std::{f32::INFINITY, sync::mpsc, thread};
@@ -39,7 +42,8 @@ fn main() {
     let mut img = RgbImage::new(WIDTH, HEIGHT);
 
     // Scene
-    let scene = generate_random_scene();
+    let mut list = generate_random_scene();
+    let scene = BVHNode::new(&mut list, 0.0, 1.0);
 
     // Camera
     let lookfrom = Point3::new(13.0, 2.0, 3.0);
@@ -127,6 +131,24 @@ fn main() {
         }
     }
 
+    // let mut rng = thread_rng();
+    // for y in (0..HEIGHT).rev() {
+    //     for x in 0..WIDTH {
+    //         let mut color = Color::default();
+    //         for _ in 0..SAMPLE_SIZE {
+    //             let u = (x as f32 + rng.gen::<f32>()) / (WIDTH - 1) as f32;
+    //             let v = (y as f32 + rng.gen::<f32>()) / (HEIGHT - 1) as f32;
+
+    //             let ray = camera.get_ray(u, v);
+    //             color += raytrace(ray, &scene, MAX_DEPTH);
+    //         }
+
+    //         let color = calculate_pixel_color(color, SAMPLE_SIZE);
+
+    //         img.put_pixel(x, HEIGHT - 1 - y, color);
+    //     }
+    // }
+
     println!("\nSaving image...");
 
     img.save(FILENAME).expect("Could not save image");
@@ -150,7 +172,7 @@ fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
     ])
 }
 
-fn raytrace(ray: Ray, scene: &HitList, depth: u32) -> Color {
+fn raytrace(ray: Ray, scene: &BVHNode, depth: u32) -> Color {
     if depth == 0 {
         return Color::default();
     }
@@ -199,8 +221,7 @@ fn generate_random_scene() -> HitList {
                 if random < 0.8 {
                     let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
                     let material = Arc::new(Lambertian::new(albedo));
-                    let center_end: Point3<f32> =
-                        center + Vec3::new(0.0, rng.gen(), 0.0);
+                    let center_end: Point3<f32> = center + Vec3::new(0.0, rng.gen(), 0.0);
                     let sphere = MovingSphere {
                         center_start: center,
                         center_end,
