@@ -1,8 +1,11 @@
-use crate::Color;
-use crate::Material;
-use crate::Ray;
-use crate::Vec3;
-use crate::{clamp, materials::Hit};
+use crate::{
+    materials::Hit,
+    rays::{Color, Ray},
+    utils::clamp,
+    vectors::Vec3,
+};
+
+use super::Material;
 
 pub struct Metal {
     albedo: Color,

@@ -1,8 +1,9 @@
-use crate::materials::Hit;
-use crate::Color;
-use crate::Material;
-use crate::Ray;
-use crate::Vec3;
+use crate::{
+    materials::Hit,
+    rays::{Color, Ray},
+    vectors::Vec3,
+    materials::Material
+};
 
 pub struct Lambertian {
     albedo: Color,

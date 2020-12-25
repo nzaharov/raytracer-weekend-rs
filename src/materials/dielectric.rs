@@ -1,10 +1,9 @@
-use rand::thread_rng;
-
-use crate::materials::Hit;
-use crate::Color;
-use crate::Material;
-use crate::Ray;
-use crate::Rng;
+use crate::{
+    hit::Hit,
+    materials::Material,
+    rays::{Color, Ray},
+};
+use rand::{thread_rng, Rng};
 
 pub struct Dielectric {
     refractive_index: f32,

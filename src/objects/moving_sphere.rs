@@ -1,10 +1,11 @@
-use crate::aabb::AAAB;
-use crate::hit::Hit;
-use crate::Arc;
-use crate::Hittable;
-use crate::Ray;
-use crate::Vec3;
-use crate::{materials::Material, Point3};
+use crate::materials::Material;
+use crate::{aabb::AAAB, vectors::Point3};
+use crate::{
+    hit::{Hit, Hittable},
+    rays::Ray,
+    vectors::Vec3,
+};
+use std::sync::Arc;
 
 pub struct MovingSphere {
     pub center_start: Point3<f32>,

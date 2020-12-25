@@ -2,10 +2,8 @@ pub mod dielectric;
 pub mod lambertian;
 pub mod metal;
 
-use crate::hit::Hit;
 use crate::rays::Ray;
-use crate::Color;
-use crate::Point3;
+use crate::{hit::Hit, rays::Color, vectors::Point3};
 
 pub trait Material {
     fn emit(&self, _u: f32, _v: u32, _p: &Point3<f32>) -> Color {

@@ -1,4 +1,4 @@
-use crate::HitList;
+use crate::hit::HitList;
 use crate::{aabb::AAAB, hit::Hittable};
 use crate::{hit::Hit, rays::Ray};
 use rand::{thread_rng, Rng};

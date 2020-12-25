@@ -1,6 +1,6 @@
 use std::mem::swap;
 
-use crate::{rays::Ray, Point3};
+use crate::{rays::Ray, vectors::Point3};
 
 #[derive(Clone, Copy)]
 pub struct AAAB {
