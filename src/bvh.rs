@@ -1,7 +1,6 @@
 use crate::hit::HitList;
 use crate::{aabb::AAAB, hit::Hittable};
 use crate::{hit::Hit, rays::Ray};
-use rand::{thread_rng, Rng};
 use std::{cmp::Ordering, sync::Arc};
 
 pub struct BVHNode {
@@ -19,30 +18,29 @@ impl BVHNode {
     }
 
     pub fn init(objects: &mut HitList, start: usize, end: usize, time0: f32, time1: f32) -> Self {
-        let axis = thread_rng().gen_range(0..=2);
+        // let axis = thread_rng().gen_range(0..=2); TODO: needs thought
+        let axis = 2;
 
         let object_span = end - start;
 
         let left: Arc<dyn Hittable>;
         let right: Arc<dyn Hittable>;
+
         if object_span == 1 {
             left = objects.get(start).unwrap().clone();
             right = left.clone();
         } else if object_span == 2 {
             let obj_a = objects.get(start).unwrap();
             let obj_b = objects.get(start + 1).unwrap();
-            if Self::box_compare(obj_a, obj_b, axis) {
+            if Self::box_compare(obj_a, obj_b, axis) == Ordering::Less {
                 left = obj_a.clone();
                 right = obj_b.clone();
             } else {
                 left = obj_b.clone();
                 right = obj_a.clone();
-            };
+            }
         } else {
-            objects.sort_by(|a, b| match Self::box_compare(a, b, axis) {
-                true => Ordering::Less,
-                false => Ordering::Greater,
-            });
+            objects.sort_by(|a, b| Self::box_compare(a, b, axis));
 
             let middle = start + object_span / 2;
             left = Arc::new(Self::init(objects, start, middle, time0, time1));
@@ -60,11 +58,15 @@ impl BVHNode {
         Self { left, right, b_box }
     }
 
-    fn box_compare(obj_a: &Arc<dyn Hittable>, obj_b: &Arc<dyn Hittable>, axis: u32) -> bool {
+    fn box_compare(obj_a: &Arc<dyn Hittable>, obj_b: &Arc<dyn Hittable>, axis: u32) -> Ordering {
         let box_a = obj_a.get_b_box(0.0, 0.0).expect("No bounding box in node");
         let box_b = obj_b.get_b_box(0.0, 0.0).expect("No bounding box in node");
 
-        box_a.min().get(axis) < box_b.min().get(axis)
+        box_a
+            .min()
+            .get(axis)
+            .partial_cmp(&box_b.min().get(axis))
+            .unwrap()
     }
 }
 
@@ -86,6 +88,9 @@ impl Hittable for BVHNode {
         } else {
             left_hit
         }
+
+        // Cleaner but not getting inlined properly -> performance hit
+        // right_hit.or(left_hit)
     }
 
     fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {
