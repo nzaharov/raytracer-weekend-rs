@@ -1,6 +1,5 @@
 #![warn(clippy::all)]
 use crate::hit::Hittable;
-use crate::utils::clamp;
 use camera::Camera;
 use image::{Rgb, RgbImage};
 use indicatif::ProgressStyle;
@@ -17,7 +16,6 @@ pub mod hit;
 pub mod materials;
 pub mod objects;
 pub mod rays;
-pub mod utils;
 pub mod vectors;
 
 const MAX_DEPTH: u32 = 50;
@@ -145,9 +143,9 @@ impl<'a> Raytracer {
         let b = (scale * b).powf(1.0 / 2.2);
 
         Rgb([
-            (256.0 * clamp(r, 0.0, 0.999)) as u8,
-            (256.0 * clamp(g, 0.0, 0.999)) as u8,
-            (256.0 * clamp(b, 0.0, 0.999)) as u8,
+            (256.0 * r.clamp(0.0, 0.999)) as u8,
+            (256.0 * g.clamp(0.0, 0.999)) as u8,
+            (256.0 * b.clamp(0.0, 0.999)) as u8,
         ])
     }
 

@@ -1,7 +1,6 @@
 use crate::{
     materials::Hit,
     rays::{Color, Ray},
-    utils::clamp,
     vectors::Vec3,
 };
 
@@ -16,7 +15,7 @@ impl Metal {
     pub fn new(albedo: Color, fuzz: f32) -> Self {
         Self {
             albedo,
-            fuzz: clamp(fuzz, -1.0, 1.0),
+            fuzz: fuzz.clamp(-1.0, 1.0),
         }
     }
 }
