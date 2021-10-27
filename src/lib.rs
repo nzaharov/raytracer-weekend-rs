@@ -139,10 +139,10 @@ impl<'a> Raytracer {
         let scale = 1.0 / sample_size as f32;
         let (r, g, b) = (color.x(), color.y(), color.z());
 
-        // Color correction (gamma=2.0)
-        let r = (scale * r).sqrt();
-        let g = (scale * g).sqrt();
-        let b = (scale * b).sqrt();
+        // Color correction (gamma=2.2)
+        let r = (scale * r).powf(1.0 / 2.2);
+        let g = (scale * g).powf(1.0 / 2.2);
+        let b = (scale * b).powf(1.0 / 2.2);
 
         Rgb([
             (256.0 * clamp(r, 0.0, 0.999)) as u8,
