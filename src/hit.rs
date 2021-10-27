@@ -10,6 +10,8 @@ pub struct Hit {
     pub point: Point3<f32>,
     pub normal: Vec3<f32>,
     pub t: f32,
+    pub u: f32,
+    pub v: f32,
     pub is_front_facing: bool,
     pub material: Arc<dyn Material>,
 }
@@ -18,6 +20,8 @@ impl Hit {
     pub fn new(
         point: Point3<f32>,
         t: f32,
+        u: f32,
+        v: f32,
         material: Arc<dyn Material>,
         ray: &Ray,
         outward_normal: &Vec3<f32>,
@@ -31,6 +35,8 @@ impl Hit {
         Self {
             point,
             t,
+            u,
+            v,
             normal,
             is_front_facing,
             material,

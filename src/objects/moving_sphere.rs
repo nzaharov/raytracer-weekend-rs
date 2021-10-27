@@ -7,6 +7,8 @@ use crate::{
 };
 use std::sync::Arc;
 
+use super::sphere::get_sphere_uv;
+
 pub struct MovingSphere {
     pub center_start: Point3<f32>,
     pub center_end: Point3<f32>,
@@ -47,9 +49,13 @@ impl Hittable for MovingSphere {
 
         let hit_point = ray.at(root);
         let outward_normal = (hit_point - self.center_at(ray.time())) / self.radius;
+        let (u, v) = get_sphere_uv(&outward_normal);
+
         let hit = Hit::new(
             hit_point,
             root,
+            u,
+            v,
             self.material.clone(),
             &ray,
             &outward_normal,

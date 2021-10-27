@@ -16,6 +16,7 @@ pub mod hit;
 pub mod materials;
 pub mod objects;
 pub mod rays;
+pub mod textures;
 pub mod vectors;
 
 const MAX_DEPTH: u32 = 50;

@@ -1,17 +1,26 @@
+use std::sync::Arc;
+
 use crate::{
     materials::Hit,
+    materials::Material,
     rays::{Color, Ray},
+    textures::{solid_color::SolidColor, Texture},
     vectors::Vec3,
-    materials::Material
 };
 
 pub struct Lambertian {
-    albedo: Color,
+    albedo: Arc<dyn Texture>,
 }
 
 impl Lambertian {
     pub fn new(albedo: Color) -> Self {
-        Self { albedo }
+        Self {
+            albedo: Arc::<SolidColor>::new(albedo.into()),
+        }
+    }
+
+    pub fn with_texture(texture: Arc<dyn Texture>) -> Self {
+        Self { albedo: texture }
     }
 }
 
@@ -26,6 +35,6 @@ impl Material for Lambertian {
 
         let scattered_ray = Ray::new(hit.point, scatter_direction, ray.time());
 
-        Some((scattered_ray, self.albedo))
+        Some((scattered_ray, self.albedo.value(hit.u, hit.v, &hit.point)))
     }
 }

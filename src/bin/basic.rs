@@ -2,7 +2,7 @@ use raytracer::{
     camera::Camera,
     hit::HitList,
     materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
-    objects::sphere::Sphere,
+    objects::{plane::Plane, sphere::Sphere},
     rays::Color,
     vectors::{Point3, Vec3},
     Raytracer,
@@ -12,7 +12,7 @@ use std::{
     time::{Instant, SystemTime},
 };
 
-const FILENAME: &str = "balls";
+const FILENAME: &str = "basic";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const SAMPLE_SIZE: u32 = 500;
 
@@ -59,9 +59,10 @@ fn main() {
         material: Arc::new(mat_1),
     };
     let mat_ground = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5);
-    let ground = Sphere {
-        center: Point3::new(0.0, -100.5, -1.0),
-        radius: 100.0,
+    let ground = Plane {
+        p1: Point3::new(0.0, 0.0, 1.0),
+        p2: Point3::new(0.0, -0.5, 0.0),
+        normal: Vec3::new(0.0, 1.0, 0.0),
         material: Arc::new(mat_ground),
     };
     let mat_2 = Lambertian::new(Color::default());

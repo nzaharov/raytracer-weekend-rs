@@ -29,9 +29,13 @@ impl Hittable for Plane {
             return None;
         }
 
+        let (u, v) = get_plane_uv(&ray.at(t), &self.normal);
+
         Some(Hit::new(
             ray.at(t),
             t,
+            u,
+            v,
             self.material.clone(),
             &ray,
             &self.normal,
@@ -41,4 +45,11 @@ impl Hittable for Plane {
     fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {
         Some(AAAB::new(self.p1, self.p1))
     }
+}
+
+fn get_plane_uv(p: &Point3<f32>, normal: &Vec3<f32>) -> (f32, f32) {
+    let u = Vec3::new(normal.y(), -normal.x(), 0.0);
+    let v = normal.cross(&u);
+
+    (u.dot(&p), v.dot(&p))
 }
