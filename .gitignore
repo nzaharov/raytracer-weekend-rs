@@ -2,4 +2,5 @@
 /target
 
 # Image output
-/output
+/output/*
+!/output/.gitkeep
