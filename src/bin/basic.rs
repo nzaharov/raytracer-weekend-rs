@@ -7,14 +7,26 @@ use raytracer::{
     vectors::{Point3, Vec3},
     Raytracer,
 };
-use std::{sync::Arc, time::Instant};
+use std::{
+    sync::Arc,
+    time::{Instant, SystemTime},
+};
 
-const FILENAME: &str = "output/test.png";
+const FILENAME: &str = "balls";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const SAMPLE_SIZE: u32 = 500;
 
 fn main() {
     let now = Instant::now();
+
+    let filename = format!(
+        "output/{}_{}.png",
+        FILENAME,
+        SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    );
 
     // Dimensions
     const WIDTH: u32 = 1920;
@@ -78,7 +90,7 @@ fn main() {
 
     let raytracer = Raytracer::new(WIDTH, HEIGHT, camera, SAMPLE_SIZE);
 
-    raytracer.render(scene, &FILENAME);
+    raytracer.render(scene, &filename);
 
     println!("Finished in {} ms", now.elapsed().as_millis());
 }

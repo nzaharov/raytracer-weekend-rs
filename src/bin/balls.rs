@@ -8,14 +8,24 @@ use raytracer::rays::Color;
 use raytracer::vectors::{Point3, Vec3};
 use raytracer::{camera::Camera, Raytracer};
 use std::sync::Arc;
+use std::time::{Instant, SystemTime};
 
-const FILENAME: &str = "output/test.png";
+const FILENAME: &str = "balls";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
 const SAMPLE_SIZE: u32 = 100;
 
 fn main() {
     // Start timer
-    let now = std::time::Instant::now();
+    let now = Instant::now();
+
+    let filename = format!(
+        "output/{}_{}.png",
+        FILENAME,
+        SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    );
 
     // Dimensions
     const WIDTH: u32 = 640;
@@ -44,7 +54,7 @@ fn main() {
     let mut list = generate_random_scene();
     let scene = BVHNode::new(&mut list, 0.0, 1.0);
 
-    raytracer.render(scene, &FILENAME);
+    raytracer.render(scene, &filename);
 
     println!("Finished in {} ms", now.elapsed().as_millis());
 }
