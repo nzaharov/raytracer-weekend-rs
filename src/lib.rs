@@ -1,4 +1,8 @@
 #![warn(clippy::all)]
+
+#[global_allocator]
+static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
+
 use crate::hit::Hittable;
 use camera::Camera;
 use image::{Rgb, RgbImage};

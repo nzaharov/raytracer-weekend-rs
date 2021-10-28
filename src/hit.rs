@@ -93,6 +93,12 @@ impl HitList {
     }
 }
 
+impl Default for HitList {
+    fn default() -> Self {
+        HitList::new()
+    }
+}
+
 impl Hittable for HitList {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let mut closest_hit_t = t_max;

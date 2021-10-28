@@ -57,7 +57,7 @@ impl Hittable for MovingSphere {
             u,
             v,
             self.material.clone(),
-            &ray,
+            ray,
             &outward_normal,
         );
 

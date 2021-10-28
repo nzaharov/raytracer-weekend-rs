@@ -83,14 +83,7 @@ impl Hittable for BVHNode {
         };
         let right_hit = self.right.hit(ray, t_min, t_max);
 
-        if right_hit.is_some() {
-            right_hit
-        } else {
-            left_hit
-        }
-
-        // Cleaner but not getting inlined properly -> performance hit
-        // right_hit.or(left_hit)
+        right_hit.or(left_hit)
     }
 
     fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {

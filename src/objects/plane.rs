@@ -37,7 +37,7 @@ impl Hittable for Plane {
             u,
             v,
             self.material.clone(),
-            &ray,
+            ray,
             &self.normal,
         ))
     }
@@ -51,5 +51,5 @@ fn get_plane_uv(p: &Point3<f32>, normal: &Vec3<f32>) -> (f32, f32) {
     let u = Vec3::new(normal.y(), -normal.x(), 0.0);
     let v = normal.cross(&u);
 
-    (u.dot(&p), v.dot(&p))
+    (u.dot(p), v.dot(p))
 }

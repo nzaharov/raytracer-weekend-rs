@@ -43,7 +43,7 @@ impl Hittable for Sphere {
             u,
             v,
             self.material.clone(),
-            &ray,
+            ray,
             &outward_normal,
         );
 
