@@ -5,7 +5,7 @@ pub mod metal;
 use crate::rays::Ray;
 use crate::{hit::Hit, rays::Color, vectors::Point3};
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn emit(&self, _u: f32, _v: u32, _p: &Point3<f32>) -> Color {
         Color::new(1.0, 1.0, 1.0)
     }

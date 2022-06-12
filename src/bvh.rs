@@ -9,9 +9,6 @@ pub struct BVHNode {
     b_box: AAAB,
 }
 
-unsafe impl Send for BVHNode {}
-unsafe impl Sync for BVHNode {}
-
 impl BVHNode {
     pub fn new(list: &mut HitList, time0: f32, time1: f32) -> Self {
         Self::init(list, 0, list.len(), time0, time1)

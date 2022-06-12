@@ -44,17 +44,13 @@ impl Hit {
     }
 }
 
-pub trait Hittable {
+pub trait Hittable: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit>;
 
     fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB>;
 }
 
 pub struct HitList(Vec<Arc<dyn Hittable>>);
-
-unsafe impl Send for HitList {}
-
-unsafe impl Sync for HitList {}
 
 impl HitList {
     pub fn new() -> Self {
