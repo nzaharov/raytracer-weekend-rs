@@ -3,11 +3,13 @@
 #[global_allocator]
 static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
-use crate::hit::Hittable;
+use crate::hit::HittableImpl;
 use camera::Camera;
+use hit::Hittable;
 use image::{Rgb, RgbImage};
 use indicatif::ProgressStyle;
 use indicatif::{MultiProgress, ProgressBar};
+use materials::MaterialImpl;
 use rand::{thread_rng, Rng};
 use rays::{Color, Ray};
 use std::{f32::INFINITY, path::Path, sync::Arc};
@@ -44,10 +46,7 @@ impl<'a> Raytracer {
         }
     }
 
-    pub fn render<T>(self, scene: T, output: &'a dyn AsRef<Path>)
-    where
-        T: Hittable + Send + Sync + 'static,
-    {
+    pub fn render(self, scene: Hittable, output: &'a dyn AsRef<Path>) {
         // Init image
         let mut img = RgbImage::new(self.width, self.height);
         // Chunks
@@ -154,7 +153,7 @@ impl<'a> Raytracer {
         ])
     }
 
-    fn raytrace(ray: Ray, scene: &dyn Hittable, depth: u32) -> Color {
+    fn raytrace(ray: Ray, scene: &Hittable, depth: u32) -> Color {
         if depth == 0 {
             return Color::default();
         }

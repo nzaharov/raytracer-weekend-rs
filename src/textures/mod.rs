@@ -1,7 +1,16 @@
 pub mod solid_color;
 
-use crate::{rays::Color, vectors::Point3};
+use enum_dispatch::enum_dispatch;
 
-pub trait Texture: Send + Sync {
+use crate::{rays::Color, vectors::Point3};
+use solid_color::*;
+
+#[enum_dispatch]
+pub trait TextureImpl: Send + Sync {
     fn value(&self, u: f32, v: f32, p: &Point3<f32>) -> Color;
+}
+
+#[enum_dispatch(TextureImpl)]
+pub enum Texture {
+    SolidColor,
 }

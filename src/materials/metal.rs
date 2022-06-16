@@ -4,7 +4,7 @@ use crate::{
     vectors::Vec3,
 };
 
-use super::Material;
+use super::MaterialImpl;
 
 pub struct Metal {
     albedo: Color,
@@ -20,7 +20,7 @@ impl Metal {
     }
 }
 
-impl Material for Metal {
+impl MaterialImpl for Metal {
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)> {
         let reflected = ray.direction().unit_vector().reflect(&hit.normal);
         let fuzz = if self.fuzz == 0.0 {

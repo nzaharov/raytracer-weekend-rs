@@ -1,8 +1,13 @@
+use enum_dispatch::enum_dispatch;
+
+use crate::bvh::*;
+use crate::materials::Material;
+use crate::objects::{moving_sphere::*, plane::*, sphere::*};
+use crate::rays::Ray;
 use crate::{
     aabb::AAAB,
     vectors::{Point3, Vec3},
 };
-use crate::{materials::Material, rays::Ray};
 use core::cmp::Ordering;
 use std::sync::Arc;
 
@@ -13,7 +18,7 @@ pub struct Hit {
     pub u: f32,
     pub v: f32,
     pub is_front_facing: bool,
-    pub material: Arc<dyn Material>,
+    pub material: Arc<Material>,
 }
 
 impl Hit {
@@ -22,7 +27,7 @@ impl Hit {
         t: f32,
         u: f32,
         v: f32,
-        material: Arc<dyn Material>,
+        material: Arc<Material>,
         ray: &Ray,
         outward_normal: &Vec3<f32>,
     ) -> Self {
@@ -44,20 +49,21 @@ impl Hit {
     }
 }
 
-pub trait Hittable: Send + Sync {
+#[enum_dispatch]
+pub trait HittableImpl: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit>;
 
     fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB>;
 }
 
-pub struct HitList(Vec<Arc<dyn Hittable>>);
+pub struct HitList(Vec<Arc<Hittable>>);
 
 impl HitList {
     pub fn new() -> Self {
         Self(Vec::new())
     }
 
-    pub fn add(&mut self, obj: Arc<dyn Hittable>) {
+    pub fn add(&mut self, obj: Arc<Hittable>) {
         self.0.push(obj);
     }
 
@@ -69,7 +75,7 @@ impl HitList {
         self.0.is_empty()
     }
 
-    pub fn iter(&self) -> std::slice::Iter<Arc<dyn Hittable>> {
+    pub fn iter(&self) -> std::slice::Iter<Arc<Hittable>> {
         self.0.iter()
     }
 
@@ -77,13 +83,13 @@ impl HitList {
         self.0.len()
     }
 
-    pub fn get(&self, index: usize) -> Option<&Arc<dyn Hittable>> {
+    pub fn get(&self, index: usize) -> Option<&Arc<Hittable>> {
         self.0.get(index)
     }
 
     pub fn sort_by<F>(&mut self, compare: F)
     where
-        F: FnMut(&Arc<dyn Hittable>, &Arc<dyn Hittable>) -> Ordering,
+        F: FnMut(&Arc<Hittable>, &Arc<Hittable>) -> Ordering,
     {
         self.0.sort_by(compare);
     }
@@ -95,7 +101,7 @@ impl Default for HitList {
     }
 }
 
-impl Hittable for HitList {
+impl HittableImpl for HitList {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let mut closest_hit_t = t_max;
         let mut current_hit: Option<Hit> = None;
@@ -130,4 +136,13 @@ impl Hittable for HitList {
 
         curr_box
     }
+}
+
+#[enum_dispatch(HittableImpl)]
+pub enum Hittable {
+    HitList,
+    BVHNode,
+    MovingSphere,
+    Plane,
+    Sphere,
 }

@@ -1,6 +1,6 @@
 use crate::{
     hit::Hit,
-    materials::Material,
+    materials::MaterialImpl,
     rays::{Color, Ray},
 };
 use rand::{thread_rng, Rng};
@@ -23,7 +23,7 @@ impl Dielectric {
     }
 }
 
-impl Material for Dielectric {
+impl MaterialImpl for Dielectric {
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)> {
         let attenuation = Color::new(1.0, 1.0, 1.0);
         let refraction_ratio = if hit.is_front_facing {

@@ -1,11 +1,11 @@
-use crate::hit::HitList;
-use crate::{aabb::AAAB, hit::Hittable};
+use crate::hit::{HitList, Hittable};
+use crate::{aabb::AAAB, hit::HittableImpl};
 use crate::{hit::Hit, rays::Ray};
 use std::{cmp::Ordering, sync::Arc};
 
 pub struct BVHNode {
-    left: Arc<dyn Hittable>,
-    right: Arc<dyn Hittable>,
+    left: Arc<Hittable>,
+    right: Arc<Hittable>,
     b_box: AAAB,
 }
 
@@ -20,8 +20,8 @@ impl BVHNode {
 
         let object_span = end - start;
 
-        let left: Arc<dyn Hittable>;
-        let right: Arc<dyn Hittable>;
+        let left: Arc<Hittable>;
+        let right: Arc<Hittable>;
 
         if object_span == 1 {
             left = objects.get(start).unwrap().clone();
@@ -40,8 +40,8 @@ impl BVHNode {
             objects.sort_by(|a, b| Self::box_compare(a, b, axis));
 
             let middle = start + object_span / 2;
-            left = Arc::new(Self::init(objects, start, middle, time0, time1));
-            right = Arc::new(Self::init(objects, middle, end, time0, time1));
+            left = Arc::new(Self::init(objects, start, middle, time0, time1).into());
+            right = Arc::new(Self::init(objects, middle, end, time0, time1).into());
         }
 
         let box_left = left
@@ -55,7 +55,7 @@ impl BVHNode {
         Self { left, right, b_box }
     }
 
-    fn box_compare(obj_a: &Arc<dyn Hittable>, obj_b: &Arc<dyn Hittable>, axis: u32) -> Ordering {
+    fn box_compare(obj_a: &Arc<Hittable>, obj_b: &Arc<Hittable>, axis: u32) -> Ordering {
         let box_a = obj_a.get_b_box(0.0, 0.0).expect("No bounding box in node");
         let box_b = obj_b.get_b_box(0.0, 0.0).expect("No bounding box in node");
 
@@ -67,7 +67,7 @@ impl BVHNode {
     }
 }
 
-impl Hittable for BVHNode {
+impl HittableImpl for BVHNode {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         if !self.b_box.is_in(ray, t_min, t_max) {
             return None;

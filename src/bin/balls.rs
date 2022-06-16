@@ -54,7 +54,7 @@ fn main() {
     let mut list = generate_random_scene();
     let scene = BVHNode::new(&mut list, 0.0, 1.0);
 
-    raytracer.render(scene, &filename);
+    raytracer.render(scene.into(), &filename);
 
     println!("Finished in {} ms", now.elapsed().as_millis());
 }
@@ -67,9 +67,9 @@ fn generate_random_scene() -> HitList {
     let ground = Sphere {
         center: Point3::new(0.0, -1000.0, 0.0),
         radius: 1000.0,
-        material: Arc::new(ground_mat),
+        material: Arc::new(ground_mat.into()),
     };
-    scene.add(Arc::new(ground));
+    scene.add(Arc::new(ground.into()));
 
     for i in -11..11 {
         for j in -11..11 {
@@ -84,7 +84,7 @@ fn generate_random_scene() -> HitList {
             if (center - Point3::new(4.0, 2.0, 0.0)).norm() > 0.9 {
                 if random < 0.8 {
                     let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
-                    let material = Arc::new(Lambertian::new(albedo));
+                    let material = Arc::new(Lambertian::new(albedo).into());
                     let center_end: Point3<f32> = center + Vec3::new(0.0, rng.gen(), 0.0);
                     let sphere = MovingSphere {
                         center_start: center,
@@ -94,25 +94,25 @@ fn generate_random_scene() -> HitList {
                         radius: 0.2,
                         material,
                     };
-                    scene.add(Arc::new(sphere));
+                    scene.add(Arc::new(sphere.into()));
                 } else if random < 0.95 {
                     let albedo = Color::new_random(0.5, 1.0);
                     let fuzz = rng.gen_range(0.0..0.5);
-                    let material = Arc::new(Metal::new(albedo, fuzz));
+                    let material = Arc::new(Metal::new(albedo, fuzz).into());
                     let sphere = Sphere {
                         center,
                         radius: 0.2,
                         material,
                     };
-                    scene.add(Arc::new(sphere));
+                    scene.add(Arc::new(sphere.into()));
                 } else {
-                    let material = Arc::new(Dielectric::new(1.5));
+                    let material = Arc::new(Dielectric::new(1.5).into());
                     let sphere = Sphere {
                         center,
                         radius: 0.2,
                         material,
                     };
-                    scene.add(Arc::new(sphere));
+                    scene.add(Arc::new(sphere.into()));
                 }
             }
         }
@@ -121,22 +121,22 @@ fn generate_random_scene() -> HitList {
     let big1 = Sphere {
         center: Point3::new(0.0, 1.0, 0.0),
         radius: 1.0,
-        material: Arc::new(Dielectric::new(1.5)),
+        material: Arc::new(Dielectric::new(1.5).into()),
     };
     let big2 = Sphere {
         center: Point3::new(-4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1))),
+        material: Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)).into()),
     };
     let big3 = Sphere {
         center: Point3::new(4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0)),
+        material: Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0).into()),
     };
 
-    scene.add(Arc::new(big1));
-    scene.add(Arc::new(big2));
-    scene.add(Arc::new(big3));
+    scene.add(Arc::new(big1.into()));
+    scene.add(Arc::new(big2.into()));
+    scene.add(Arc::new(big3.into()));
 
     scene
 }

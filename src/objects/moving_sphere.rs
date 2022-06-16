@@ -1,7 +1,7 @@
 use crate::materials::Material;
 use crate::{aabb::AAAB, vectors::Point3};
 use crate::{
-    hit::{Hit, Hittable},
+    hit::{Hit, HittableImpl},
     rays::Ray,
     vectors::Vec3,
 };
@@ -15,7 +15,7 @@ pub struct MovingSphere {
     pub time_start: f32,
     pub time_end: f32,
     pub radius: f32,
-    pub material: Arc<dyn Material>,
+    pub material: Arc<Material>,
 }
 
 impl MovingSphere {
@@ -25,7 +25,7 @@ impl MovingSphere {
     }
 }
 
-impl Hittable for MovingSphere {
+impl HittableImpl for MovingSphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let oc: Vec3<f32> = ray.origin() - self.center_at(ray.time());
         let a = ray.direction().norm_sqr();

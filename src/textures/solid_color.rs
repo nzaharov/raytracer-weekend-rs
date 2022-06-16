@@ -1,6 +1,6 @@
 use crate::{rays::Color, vectors::Point3};
 
-use super::Texture;
+use super::TextureImpl;
 
 pub struct SolidColor {
     color_value: Color,
@@ -19,7 +19,7 @@ impl From<Color> for SolidColor {
     }
 }
 
-impl Texture for SolidColor {
+impl TextureImpl for SolidColor {
     fn value(&self, _: f32, _: f32, _: &Point3<f32>) -> Color {
         self.color_value
     }

@@ -8,10 +8,10 @@ use std::sync::Arc;
 pub struct Sphere {
     pub center: Point3<f32>,
     pub radius: f32,
-    pub material: Arc<dyn Material>,
+    pub material: Arc<Material>,
 }
 
-impl Hittable for Sphere {
+impl HittableImpl for Sphere {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let oc: Vec3<f32> = ray.origin() - self.center;
         let a = ray.direction().norm_sqr();

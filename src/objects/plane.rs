@@ -1,6 +1,6 @@
 use crate::aabb::AAAB;
 use crate::{
-    hit::{Hit, Hittable},
+    hit::{Hit, HittableImpl},
     materials::Material,
     rays::Ray,
     vectors::{Point3, Vec3},
@@ -11,10 +11,10 @@ pub struct Plane {
     pub p1: Point3<f32>,
     pub p2: Point3<f32>,
     pub normal: Vec3<f32>,
-    pub material: Arc<dyn Material>,
+    pub material: Arc<Material>,
 }
 
-impl Hittable for Plane {
+impl HittableImpl for Plane {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let denominator = ray.direction().dot(&self.normal);
         if denominator == 0.0 {
