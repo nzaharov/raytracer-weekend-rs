@@ -51,26 +51,23 @@ impl<'a> Raytracer {
             .rev()
             .collect::<Vec<u32>>()
             .into_par_iter()
-            .map_init(
-                || thread_rng(),
-                |rng, line| {
-                    (0..self.width)
-                        .map(|w| (line, w))
-                        .flat_map(|(y, x)| {
-                            let mut color = Color::default();
-                            for _ in 0..self.sample_size {
-                                let u = (x as f32 + rng.gen::<f32>()) / (self.width - 1) as f32;
-                                let v = (y as f32 + rng.gen::<f32>()) / (self.height - 1) as f32;
+            .map_init(thread_rng, |rng, line| {
+                (0..self.width)
+                    .map(|w| (line, w))
+                    .flat_map(|(y, x)| {
+                        let mut color = Color::default();
+                        for _ in 0..self.sample_size {
+                            let u = (x as f32 + rng.gen::<f32>()) / (self.width - 1) as f32;
+                            let v = (y as f32 + rng.gen::<f32>()) / (self.height - 1) as f32;
 
-                                let ray = self.camera.get_ray(u, v);
-                                color += Self::raytrace(ray, &scene, MAX_DEPTH);
-                            }
+                            let ray = self.camera.get_ray(u, v);
+                            color += Self::raytrace(ray, &scene, MAX_DEPTH);
+                        }
 
-                            Self::calculate_pixel_color(color, self.sample_size)
-                        })
-                        .collect::<Vec<u8>>()
-                },
-            )
+                        Self::calculate_pixel_color(color, self.sample_size)
+                    })
+                    .collect::<Vec<u8>>()
+            })
             .flatten()
             .collect::<Vec<u8>>();
 

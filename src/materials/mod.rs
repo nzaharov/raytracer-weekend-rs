@@ -29,9 +29,9 @@ pub enum Material {
 impl Clone for Material {
     fn clone(&self) -> Self {
         match self {
-            Self::Dielectric(arg0) => Self::Dielectric(arg0.clone()),
+            Self::Dielectric(arg0) => Self::Dielectric(*arg0),
             Self::Lambertian(arg0) => Self::Lambertian(arg0.clone()),
-            Self::Metal(arg0) => Self::Metal(arg0.clone()),
+            Self::Metal(arg0) => Self::Metal(*arg0),
         }
     }
 }

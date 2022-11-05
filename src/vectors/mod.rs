@@ -2,7 +2,7 @@ pub mod utils;
 
 use std::ops::{AddAssign, DivAssign, MulAssign, Neg};
 
-#[derive(PartialEq, Debug, Clone, Copy)]
+#[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct Vec3<T>(T, T, T);
 
 pub type Point3<T> = Vec3<T>;
