@@ -6,6 +6,7 @@ use crate::{
 
 use super::MaterialImpl;
 
+#[derive(Clone, Copy)]
 pub struct Metal {
     albedo: Color,
     fuzz: f32,

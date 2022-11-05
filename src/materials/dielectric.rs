@@ -5,6 +5,7 @@ use crate::{
 };
 use rand::{thread_rng, Rng};
 
+#[derive(Clone, Copy)]
 pub struct Dielectric {
     refractive_index: f32,
 }

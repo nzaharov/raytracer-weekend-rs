@@ -10,6 +10,7 @@ pub trait TextureImpl: Send + Sync {
     fn value(&self, u: f32, v: f32, p: &Point3<f32>) -> Color;
 }
 
+#[derive(Clone, Copy)]
 #[enum_dispatch(TextureImpl)]
 pub enum Texture {
     SolidColor,

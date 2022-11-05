@@ -12,7 +12,7 @@ use std::time::{Instant, SystemTime};
 
 const FILENAME: &str = "balls";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const SAMPLE_SIZE: u32 = 100;
+const SAMPLE_SIZE: u32 = 2000;
 
 fn main() {
     // Start timer
@@ -67,7 +67,7 @@ fn generate_random_scene() -> HitList {
     let ground = Sphere {
         center: Point3::new(0.0, -1000.0, 0.0),
         radius: 1000.0,
-        material: Arc::new(ground_mat.into()),
+        material: ground_mat.into(),
     };
     scene.add(Arc::new(ground.into()));
 
@@ -84,7 +84,7 @@ fn generate_random_scene() -> HitList {
             if (center - Point3::new(4.0, 2.0, 0.0)).norm() > 0.9 {
                 if random < 0.8 {
                     let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
-                    let material = Arc::new(Lambertian::new(albedo).into());
+                    let material = Lambertian::new(albedo).into();
                     let center_end: Point3<f32> = center + Vec3::new(0.0, rng.gen(), 0.0);
                     let sphere = MovingSphere {
                         center_start: center,
@@ -98,7 +98,7 @@ fn generate_random_scene() -> HitList {
                 } else if random < 0.95 {
                     let albedo = Color::new_random(0.5, 1.0);
                     let fuzz = rng.gen_range(0.0..0.5);
-                    let material = Arc::new(Metal::new(albedo, fuzz).into());
+                    let material = Metal::new(albedo, fuzz).into();
                     let sphere = Sphere {
                         center,
                         radius: 0.2,
@@ -106,7 +106,7 @@ fn generate_random_scene() -> HitList {
                     };
                     scene.add(Arc::new(sphere.into()));
                 } else {
-                    let material = Arc::new(Dielectric::new(1.5).into());
+                    let material = Dielectric::new(1.5).into();
                     let sphere = Sphere {
                         center,
                         radius: 0.2,
@@ -121,17 +121,17 @@ fn generate_random_scene() -> HitList {
     let big1 = Sphere {
         center: Point3::new(0.0, 1.0, 0.0),
         radius: 1.0,
-        material: Arc::new(Dielectric::new(1.5).into()),
+        material: Dielectric::new(1.5).into(),
     };
     let big2 = Sphere {
         center: Point3::new(-4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)).into()),
+        material: Lambertian::new(Color::new(0.4, 0.2, 0.1)).into(),
     };
     let big3 = Sphere {
         center: Point3::new(4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0).into()),
+        material: Metal::new(Color::new(0.7, 0.6, 0.5), 0.0).into(),
     };
 
     scene.add(Arc::new(big1.into()));

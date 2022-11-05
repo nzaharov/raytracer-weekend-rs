@@ -3,12 +3,12 @@ use crate::rays::*;
 use crate::vectors::*;
 use crate::{hit::*, materials::Material};
 use std::f32::consts::PI;
-use std::sync::Arc;
 
+#[derive(Clone, Copy)]
 pub struct Sphere {
     pub center: Point3<f32>,
     pub radius: f32,
-    pub material: Arc<Material>,
+    pub material: Material,
 }
 
 impl HittableImpl for Sphere {

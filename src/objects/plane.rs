@@ -5,13 +5,13 @@ use crate::{
     rays::Ray,
     vectors::{Point3, Vec3},
 };
-use std::sync::Arc;
 
+#[derive(Clone, Copy)]
 pub struct Plane {
     pub p1: Point3<f32>,
     pub p2: Point3<f32>,
     pub normal: Vec3<f32>,
-    pub material: Arc<Material>,
+    pub material: Material,
 }
 
 impl HittableImpl for Plane {

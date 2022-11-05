@@ -11,7 +11,7 @@ use lambertian::*;
 use metal::*;
 
 #[enum_dispatch]
-pub trait MaterialImpl: Send + Sync {
+pub trait MaterialImpl {
     fn emit(&self, _u: f32, _v: u32, _p: &Point3<f32>) -> Color {
         Color::new(1.0, 1.0, 1.0)
     }
@@ -19,6 +19,7 @@ pub trait MaterialImpl: Send + Sync {
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)>;
 }
 
+#[derive(Clone, Copy)]
 #[enum_dispatch(MaterialImpl)]
 pub enum Material {
     Dielectric,

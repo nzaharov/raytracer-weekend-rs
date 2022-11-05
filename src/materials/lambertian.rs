@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     materials::Hit,
     materials::MaterialImpl,
@@ -8,19 +6,22 @@ use crate::{
     vectors::Vec3,
 };
 
+#[derive(Clone, Copy)]
 pub struct Lambertian {
-    albedo: Arc<Texture>,
+    albedo: Texture,
 }
 
 impl Lambertian {
     pub fn new(albedo: Color) -> Self {
         Self {
-            albedo: Arc::new(SolidColor::from(albedo).into()),
+            albedo: SolidColor::from(albedo).into(),
         }
     }
 
-    pub fn with_texture(texture: Arc<Texture>) -> Self {
-        Self { albedo: texture }
+    pub fn with_texture(texture: &Texture) -> Self {
+        Self {
+            albedo: texture.clone(),
+        }
     }
 }
 

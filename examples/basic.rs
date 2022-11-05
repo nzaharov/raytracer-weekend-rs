@@ -56,32 +56,32 @@ fn main() {
     let sphere1 = Sphere {
         center: Point3::new(0.0, 0.0, -1.0),
         radius: 0.5,
-        material: Arc::new(mat_1.into()),
+        material: mat_1.into(),
     };
     let mat_ground = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5);
     let ground = Plane {
         p1: Point3::new(0.0, 0.0, 1.0),
         p2: Point3::new(0.0, -0.5, 0.0),
         normal: Vec3::new(0.0, 1.0, 0.0),
-        material: Arc::new(mat_ground.into()),
+        material: mat_ground.into(),
     };
     let mat_2 = Lambertian::new(Color::default());
     let sphere2 = Sphere {
         center: Point3::new(1.0, 0.0, -2.0),
         radius: 0.5,
-        material: Arc::new(mat_2.into()),
+        material: mat_2.into(),
     };
     let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8), 0.0);
     let metal = Sphere {
         center: Point3::new(-2.0, 0.0, -1.5),
         radius: 0.5,
-        material: Arc::new(mat_metal.into()),
+        material: mat_metal.into(),
     };
     let glass_mat = Dielectric::new(1.5);
     let crystal_ball = Sphere {
         center: Point3::new(0.27, 0.1, -0.5),
         radius: -0.05,
-        material: Arc::new(glass_mat.into()),
+        material: glass_mat.into(),
     };
     scene.add(Arc::new(sphere1.into()));
     scene.add(Arc::new(ground.into()));
