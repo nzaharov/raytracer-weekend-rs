@@ -1,4 +1,4 @@
-use crate::aabb::AAAB;
+use crate::aabb::AABB;
 use crate::rays::*;
 use crate::vectors::*;
 use crate::{hit::*, materials::Material};
@@ -50,8 +50,8 @@ impl HittableImpl for Sphere {
         Some(hit)
     }
 
-    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {
-        Some(AAAB::new(
+    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AABB> {
+        Some(AABB::new(
             self.center - Vec3::new(self.radius, self.radius, self.radius),
             self.center + Vec3::new(self.radius, self.radius, self.radius),
         ))

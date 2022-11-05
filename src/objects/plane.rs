@@ -1,4 +1,4 @@
-use crate::aabb::AAAB;
+use crate::aabb::AABB;
 use crate::{
     hit::{Hit, HittableImpl},
     materials::Material,
@@ -42,8 +42,8 @@ impl HittableImpl for Plane {
         ))
     }
 
-    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {
-        Some(AAAB::new(self.p1, self.p1))
+    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AABB> {
+        Some(AABB::new(self.p1, self.p1))
     }
 }
 

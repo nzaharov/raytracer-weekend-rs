@@ -3,12 +3,12 @@ use std::mem::swap;
 use crate::{rays::Ray, vectors::Point3};
 
 #[derive(Clone, Copy)]
-pub struct AAAB {
+pub struct AABB {
     min: Point3<f32>,
     max: Point3<f32>,
 }
 
-impl AAAB {
+impl AABB {
     pub fn new(min: Point3<f32>, max: Point3<f32>) -> Self {
         Self { min, max }
     }

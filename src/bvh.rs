@@ -1,12 +1,12 @@
 use crate::hit::{HitList, Hittable};
-use crate::{aabb::AAAB, hit::HittableImpl};
+use crate::{aabb::AABB, hit::HittableImpl};
 use crate::{hit::Hit, rays::Ray};
 use std::{cmp::Ordering, sync::Arc};
 
 pub struct BVHNode {
     left: Arc<Hittable>,
     right: Arc<Hittable>,
-    b_box: AAAB,
+    b_box: AABB,
 }
 
 impl BVHNode {
@@ -50,7 +50,7 @@ impl BVHNode {
         let box_right = right
             .get_b_box(time0, time1)
             .expect("No bounding box in node");
-        let b_box = AAAB::new_surrounding_box(box_left, box_right);
+        let b_box = AABB::new_surrounding_box(box_left, box_right);
 
         Self { left, right, b_box }
     }
@@ -83,7 +83,7 @@ impl HittableImpl for BVHNode {
         right_hit.or(left_hit)
     }
 
-    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AAAB> {
+    fn get_b_box(&self, _time0: f32, _time1: f32) -> Option<AABB> {
         Some(self.b_box)
     }
 }

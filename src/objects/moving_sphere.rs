@@ -1,5 +1,5 @@
 use crate::materials::Material;
-use crate::{aabb::AAAB, vectors::Point3};
+use crate::{aabb::AABB, vectors::Point3};
 use crate::{
     hit::{Hit, HittableImpl},
     rays::Ray,
@@ -64,16 +64,16 @@ impl HittableImpl for MovingSphere {
         Some(hit)
     }
 
-    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB> {
-        let box0 = AAAB::new(
+    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AABB> {
+        let box0 = AABB::new(
             self.center_at(time0) - Vec3::new(self.radius, self.radius, self.radius),
             self.center_at(time0) + Vec3::new(self.radius, self.radius, self.radius),
         );
-        let box1 = AAAB::new(
+        let box1 = AABB::new(
             self.center_at(time1) - Vec3::new(self.radius, self.radius, self.radius),
             self.center_at(time1) + Vec3::new(self.radius, self.radius, self.radius),
         );
 
-        Some(AAAB::new_surrounding_box(box0, box1))
+        Some(AABB::new_surrounding_box(box0, box1))
     }
 }

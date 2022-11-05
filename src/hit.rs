@@ -5,7 +5,7 @@ use crate::materials::Material;
 use crate::objects::{moving_sphere::*, plane::*, sphere::*};
 use crate::rays::Ray;
 use crate::{
-    aabb::AAAB,
+    aabb::AABB,
     vectors::{Point3, Vec3},
 };
 use core::cmp::Ordering;
@@ -53,7 +53,7 @@ impl Hit {
 pub trait HittableImpl: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit>;
 
-    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB>;
+    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AABB>;
 }
 
 pub struct HitList(Vec<Arc<Hittable>>);
@@ -116,7 +116,7 @@ impl HittableImpl for HitList {
         current_hit
     }
 
-    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AAAB> {
+    fn get_b_box(&self, time0: f32, time1: f32) -> Option<AABB> {
         if self.is_empty() {
             return None;
         }
@@ -126,7 +126,7 @@ impl HittableImpl for HitList {
         for object in self.iter() {
             if let Some(b_box) = object.get_b_box(time0, time1) {
                 curr_box = match curr_box {
-                    Some(curr) => Some(AAAB::new_surrounding_box(b_box, curr)),
+                    Some(curr) => Some(AABB::new_surrounding_box(b_box, curr)),
                     None => Some(b_box),
                 };
             } else {
