@@ -14,6 +14,8 @@ pub struct Perlin {
 }
 
 impl Perlin {
+    pub const DEFAULT_DEPTH: usize = 7;
+
     pub fn noise(&self, p: &Point3<f32>) -> f32 {
         let u = p.x() - p.x().floor();
         let v = p.y() - p.y().floor();
@@ -41,6 +43,20 @@ impl Perlin {
             .collect::<Vec<Vec<Vec<Vec3<f32>>>>>();
 
         perlin_interpolation(c, u, v, w)
+    }
+
+    pub fn turbulence(&self, p: &Point3<f32>, depth: usize) -> f32 {
+        let mut acc = 0.0;
+        let mut p = p.clone();
+        let mut weight = 1.0;
+
+        for _ in 0..depth {
+            acc += weight * self.noise(&p);
+            weight *= 0.5;
+            p *= 2.0;
+        }
+
+        acc.abs()
     }
 }
 

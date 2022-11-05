@@ -12,9 +12,9 @@ use std::{
     time::{Instant, SystemTime},
 };
 
-const FILENAME: &str = "perlin";
+const FILENAME: &str = "marble";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const SAMPLE_SIZE: u32 = 100;
+const SAMPLE_SIZE: u32 = 1000;
 
 fn main() {
     let now = Instant::now();
@@ -29,7 +29,7 @@ fn main() {
     );
 
     // Dimensions
-    const WIDTH: u32 = 640;
+    const WIDTH: u32 = 1280;
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
 
     // Camera
