@@ -6,14 +6,12 @@ static GLOBAL: jemallocator::Jemalloc = jemallocator::Jemalloc;
 use crate::hit::HittableImpl;
 use camera::Camera;
 use hit::Hittable;
-use image::{Rgb, RgbImage};
-use indicatif::ProgressStyle;
-use indicatif::{MultiProgress, ProgressBar};
+use image::RgbImage;
 use materials::MaterialImpl;
 use rand::{thread_rng, Rng};
+use rayon::prelude::*;
 use rays::{Color, Ray};
-use std::{f32::INFINITY, path::Path, sync::Arc};
-use std::{sync::mpsc, thread};
+use std::{f32::INFINITY, path::Path};
 
 pub mod aabb;
 pub mod bvh;
@@ -47,97 +45,46 @@ impl<'a> Raytracer {
     }
 
     pub fn render(self, scene: Hittable, output: &'a dyn AsRef<Path>) {
-        // Init image
-        let mut img = RgbImage::new(self.width, self.height);
-        // Chunks
-        println!("Preparing chunks...");
-
-        let chunks = self.image_chunks();
-
-        println!("Chunks prepared!");
-
-        // Progress bar init
-        let multibar = MultiProgress::new();
-        let style = ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>7}/{len:7} {msg}")
-            .progress_chars("=> ");
-
         println!("\nStarting workers...\n");
 
-        let (tx, rx) = mpsc::channel::<Vec<(u32, u32, image::Rgb<u8>)>>();
+        let subpixels = (0..self.height)
+            .rev()
+            .collect::<Vec<u32>>()
+            .into_par_iter()
+            .map_init(
+                || thread_rng(),
+                |rng, line| {
+                    (0..self.width)
+                        .map(|w| (line, w))
+                        .flat_map(|(y, x)| {
+                            let mut color = Color::default();
+                            for _ in 0..self.sample_size {
+                                let u = (x as f32 + rng.gen::<f32>()) / (self.width - 1) as f32;
+                                let v = (y as f32 + rng.gen::<f32>()) / (self.height - 1) as f32;
 
-        let scene_arc = Arc::new(scene);
-        let tx_arc = Arc::new(tx);
-        for (_, chunk) in chunks.into_iter().enumerate() {
-            let scene_arc = scene_arc.clone();
-            let sender = mpsc::Sender::clone(&tx_arc);
+                                let ray = self.camera.get_ray(u, v);
+                                color += Self::raytrace(ray, &scene, MAX_DEPTH);
+                            }
 
-            let progress = multibar.add(ProgressBar::new(chunk.len() as u64));
-            progress.set_style(style.clone());
-
-            thread::spawn(move || {
-                let mut rng = thread_rng();
-                let pixels = chunk
-                    .into_iter()
-                    .map(|(y, x)| {
-                        progress.inc(1);
-
-                        let mut color = Color::default();
-                        for _ in 0..self.sample_size {
-                            let u = (x as f32 + rng.gen::<f32>()) / (self.width - 1) as f32;
-                            let v = (y as f32 + rng.gen::<f32>()) / (self.height - 1) as f32;
-
-                            let ray = self.camera.get_ray(u, v);
-                            color += Self::raytrace(ray, &*scene_arc, MAX_DEPTH);
-                        }
-
-                        let color = Self::calculate_pixel_color(color, self.sample_size);
-
-                        (x, self.height - 1 - y, color)
-                    })
-                    .collect();
-
-                sender.send(pixels).unwrap();
-                progress.finish_with_message("Done!");
-                drop(sender);
-            });
-        }
-        drop(tx_arc);
-
-        multibar.join().unwrap();
-
-        for pixels in rx {
-            for pixel in pixels {
-                img.put_pixel(pixel.0, pixel.1, pixel.2);
-            }
-        }
+                            Self::calculate_pixel_color(color, self.sample_size)
+                        })
+                        .collect::<Vec<u8>>()
+                },
+            )
+            .flatten()
+            .collect::<Vec<u8>>();
 
         print!("\nSaving image... ");
 
-        img.save(output).expect("Could not save image");
+        RgbImage::from_vec(self.width, self.height, subpixels)
+            .unwrap()
+            .save(output)
+            .expect("Could not save image");
 
         println!("Done!");
     }
 
-    fn image_chunks(&self) -> Vec<Vec<(u32, u32)>> {
-        let threads = num_cpus::get();
-
-        (0..self.height)
-            .collect::<Vec<u32>>()
-            .iter()
-            .map(|h| {
-                (0..self.width)
-                    .map(|w| (*h, w))
-                    .collect::<Vec<(u32, u32)>>()
-            })
-            .enumerate()
-            .fold(vec![Vec::new(); threads], |mut acc, (i, band)| {
-                acc.get_mut(i % threads).unwrap().extend(band);
-                acc
-            })
-    }
-
-    fn calculate_pixel_color(color: Color, sample_size: u32) -> Rgb<u8> {
+    fn calculate_pixel_color(color: Color, sample_size: u32) -> [u8; 3] {
         let scale = 1.0 / sample_size as f32;
         let (r, g, b) = (color.x(), color.y(), color.z());
 
@@ -146,11 +93,11 @@ impl<'a> Raytracer {
         let g = (scale * g).powf(1.0 / 2.2);
         let b = (scale * b).powf(1.0 / 2.2);
 
-        Rgb([
+        [
             (256.0 * r.clamp(0.0, 0.999)) as u8,
             (256.0 * g.clamp(0.0, 0.999)) as u8,
             (256.0 * b.clamp(0.0, 0.999)) as u8,
-        ])
+        ]
     }
 
     fn raytrace(ray: Ray, scene: &Hittable, depth: u32) -> Color {
