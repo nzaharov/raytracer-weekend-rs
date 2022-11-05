@@ -16,11 +16,36 @@ pub struct Perlin {
 
 impl Perlin {
     pub fn noise(&self, p: &Point3<f32>) -> f32 {
-        let i = ((4.0 * p.x()) as i32 & 255) as usize;
-        let j = ((4.0 * p.y()) as i32 & 255) as usize;
-        let k = ((4.0 * p.z()) as i32 & 255) as usize;
+        let mut u = p.x() - p.x().floor();
+        let mut v = p.y() - p.y().floor();
+        let mut w = p.z() - p.z().floor();
 
-        self.random_values[(self.perm_x[i] ^ self.perm_y[j] ^ self.perm_z[k]) as usize]
+        u = u * u * (3.0 - 2.0 * u);
+        v = v * v * (3.0 - 2.0 * v);
+        w = w * w * (3.0 - 2.0 * w);
+
+        let i = p.x().floor() as i32;
+        let j = p.y().floor() as i32;
+        let k = p.z().floor() as i32;
+
+        let c = (0..2)
+            .map(|dim_i| {
+                (0..2)
+                    .map(|dim_j| {
+                        (0..2)
+                            .map(|dim_k| {
+                                self.random_values[(self.perm_x[((i + dim_i) & 255) as usize]
+                                    ^ self.perm_y[((j + dim_j) & 255) as usize]
+                                    ^ self.perm_z[((k + dim_k) & 255) as usize])
+                                    as usize]
+                            })
+                            .collect()
+                    })
+                    .collect()
+            })
+            .collect::<Vec<Vec<Vec<f32>>>>();
+
+        trilinear_interpolate(c, u, v, w)
     }
 }
 
@@ -44,4 +69,24 @@ fn generate_perlin() -> Vec<i32> {
     permutation.shuffle(&mut thread_rng());
 
     permutation
+}
+
+fn trilinear_interpolate(c: Vec<Vec<Vec<f32>>>, u: f32, v: f32, w: f32) -> f32 {
+    c.iter()
+        .enumerate()
+        .flat_map(|(i, b)| {
+            b.iter().enumerate().flat_map(move |(j, a)| {
+                a.iter().enumerate().map(move |(k, x)| {
+                    let i = i as f32;
+                    let j = j as f32;
+                    let k = k as f32;
+
+                    (i * u + (1.0 - i) * (1.0 - u))
+                        * (j * v + (1.0 - j) * (1.0 - v))
+                        * (k * w + (1.0 - k) * (1.0 - w))
+                        * x
+                })
+            })
+        })
+        .sum()
 }

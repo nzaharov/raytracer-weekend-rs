@@ -52,7 +52,7 @@ fn main() {
     // Scene
     let mut scene = HitList::new();
 
-    let perlin = Noise::default();
+    let perlin = Noise::new(4.0);
     let mat = Lambertian::with_texture(&perlin.into());
     let sphere1 = Sphere {
         center: Point3::new(0.0, -1000.0, 0.0),
