@@ -1,8 +1,10 @@
+pub mod checker;
 pub mod solid_color;
 
 use enum_dispatch::enum_dispatch;
 
 use crate::{rays::Color, vectors::Point3};
+use checker::*;
 use solid_color::*;
 
 #[enum_dispatch]
@@ -14,4 +16,5 @@ pub trait TextureImpl: Send + Sync {
 #[enum_dispatch(TextureImpl)]
 pub enum Texture {
     SolidColor,
+    Checker,
 }
