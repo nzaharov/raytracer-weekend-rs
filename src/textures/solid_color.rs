@@ -2,7 +2,7 @@ use crate::{rays::Color, vectors::Point3};
 
 use super::TextureImpl;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct SolidColor {
     color_value: Color,
 }

@@ -4,7 +4,7 @@ use crate::vectors::*;
 use crate::{hit::*, materials::Material};
 use std::f32::consts::PI;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Sphere {
     pub center: Point3<f32>,
     pub radius: f32,

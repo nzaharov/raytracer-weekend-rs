@@ -8,7 +8,7 @@ use crate::{
 
 use super::sphere::get_sphere_uv;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct MovingSphere {
     pub center_start: Point3<f32>,
     pub center_end: Point3<f32>,

@@ -1,18 +1,18 @@
 use crate::{rays::Color, vectors::Point3};
 
-use super::{solid_color::SolidColor, TextureImpl};
+use super::{solid_color::SolidColor, Texture, TextureImpl};
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Checker {
-    even: SolidColor,
-    odd: SolidColor,
+    even: Box<Texture>,
+    odd: Box<Texture>,
 }
 
 impl Checker {
     pub fn from_colors(odd: Color, even: Color) -> Self {
         Self {
-            even: SolidColor::from(even).into(),
-            odd: SolidColor::from(odd).into(),
+            even: Box::new(SolidColor::from(even).into()),
+            odd: Box::new(SolidColor::from(odd).into()),
         }
     }
 }

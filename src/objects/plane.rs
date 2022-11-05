@@ -6,7 +6,7 @@ use crate::{
     vectors::{Point3, Vec3},
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Plane {
     pub p1: Point3<f32>,
     pub p2: Point3<f32>,

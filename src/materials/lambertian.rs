@@ -6,7 +6,7 @@ use crate::{
     vectors::Vec3,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Lambertian {
     albedo: Texture,
 }

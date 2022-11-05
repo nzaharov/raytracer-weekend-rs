@@ -19,10 +19,19 @@ pub trait MaterialImpl {
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)>;
 }
 
-#[derive(Clone, Copy)]
 #[enum_dispatch(MaterialImpl)]
 pub enum Material {
     Dielectric,
     Lambertian,
     Metal,
+}
+
+impl Clone for Material {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Dielectric(arg0) => Self::Dielectric(arg0.clone()),
+            Self::Lambertian(arg0) => Self::Lambertian(arg0.clone()),
+            Self::Metal(arg0) => Self::Metal(arg0.clone()),
+        }
+    }
 }
