@@ -38,6 +38,7 @@ fn main() {
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let focus_distance = 0.5;
     let aperture = 0.01;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let camera = Camera::new(
         lookfrom,
@@ -89,7 +90,7 @@ fn main() {
     scene.add(Arc::new(metal.into()));
     scene.add(Arc::new(crystal_ball.into()));
 
-    let raytracer = Raytracer::new(WIDTH, HEIGHT, camera, SAMPLE_SIZE);
+    let raytracer = Raytracer::new(WIDTH, HEIGHT, &camera, &background, SAMPLE_SIZE);
 
     raytracer.render(scene.into(), &filename);
 

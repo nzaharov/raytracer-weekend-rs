@@ -12,7 +12,7 @@ use materials::MaterialImpl;
 use rand::{thread_rng, Rng};
 use rayon::prelude::*;
 use rays::{Color, Ray};
-use std::{f32::INFINITY, path::Path};
+use std::path::Path;
 
 pub mod aabb;
 pub mod bvh;
@@ -32,15 +32,23 @@ pub struct Raytracer {
     height: u32,
     width: u32,
     camera: Camera,
+    background: Color,
     sample_size: u32,
 }
 
 impl<'a> Raytracer {
-    pub fn new(width: u32, height: u32, camera: Camera, sample_size: u32) -> Self {
+    pub fn new(
+        width: u32,
+        height: u32,
+        camera: &Camera,
+        background: &Color,
+        sample_size: u32,
+    ) -> Self {
         Self {
             height,
             width,
-            camera,
+            camera: *camera,
+            background: *background,
             sample_size,
         }
     }
@@ -63,7 +71,7 @@ impl<'a> Raytracer {
                             let v = (y as f32 + rng.gen::<f32>()) / (self.height - 1) as f32;
 
                             let ray = self.camera.get_ray(u, v);
-                            color += Self::raytrace(ray, &scene, MAX_DEPTH);
+                            color += Self::raytrace(ray, &self.background, &scene, MAX_DEPTH);
                         }
 
                         Self::calculate_pixel_color(color, self.sample_size)
@@ -99,26 +107,21 @@ impl<'a> Raytracer {
         ]
     }
 
-    fn raytrace(ray: Ray, scene: &Hittable, depth: u32) -> Color {
+    fn raytrace(ray: Ray, background: &Color, scene: &Hittable, depth: u32) -> Color {
         if depth == 0 {
             return Color::default();
         }
 
-        if let Some(hit) = scene.hit(&ray, 0.0 + BIAS, INFINITY) {
-            return match hit.material.scatter(&ray, &hit) {
-                Some((scattered_ray, attenuatuion)) => {
-                    attenuatuion * Self::raytrace(scattered_ray, scene, depth - 1)
-                }
-                None => Color::default(),
-            };
-        }
+        let Some(hit) = scene.hit(&ray, BIAS, f32::INFINITY) else {
+            return *background;
+        };
 
-        // Background sky gradient
-        let unit_direction = ray.direction().unit_vector();
-        let t = 0.5 * (unit_direction.y() + 1.0);
-        let start_value = Color::new(1.0, 1.0, 1.0);
-        let end_value = Color::new(0.5, 0.7, 1.0);
+        let emission = hit.material.emit(hit.u, hit.v, &hit.point);
 
-        (1.0 - t) * start_value + t * end_value
+        let Some((scattered_ray, attenuation)) = hit.material.scatter(&ray, &hit) else {
+            return emission;
+        };
+
+        emission + attenuation * Self::raytrace(scattered_ray, background, scene, depth - 1)
     }
 }

@@ -1,4 +1,5 @@
 pub mod dielectric;
+pub mod diffuse_light;
 pub mod lambertian;
 pub mod metal;
 
@@ -12,8 +13,8 @@ use metal::*;
 
 #[enum_dispatch]
 pub trait MaterialImpl {
-    fn emit(&self, _u: f32, _v: u32, _p: &Point3<f32>) -> Color {
-        Color::new(1.0, 1.0, 1.0)
+    fn emit(&self, _u: f32, _v: f32, _p: &Point3<f32>) -> Color {
+        Color::new(0.0, 0.0, 0.0)
     }
 
     fn scatter(&self, ray: &Ray, hit: &Hit) -> Option<(Ray, Color)>;

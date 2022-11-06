@@ -3,6 +3,7 @@ use raytracer::{
     hit::HitList,
     materials::{lambertian::Lambertian, Material},
     objects::sphere::Sphere,
+    rays::Color,
     textures::noise::Noise,
     vectors::{Point3, Vec3},
     Raytracer,
@@ -38,6 +39,7 @@ fn main() {
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let focus_distance = 10.0;
     let aperture = 0.0;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let camera = Camera::new(
         lookfrom,
@@ -68,7 +70,7 @@ fn main() {
     scene.add(Arc::new(sphere1.into()));
     scene.add(Arc::new(sphere2.into()));
 
-    let raytracer = Raytracer::new(WIDTH, HEIGHT, camera, SAMPLE_SIZE);
+    let raytracer = Raytracer::new(WIDTH, HEIGHT, &camera, &background, SAMPLE_SIZE);
 
     raytracer.render(scene.into(), &filename);
 

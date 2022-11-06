@@ -38,6 +38,7 @@ fn main() {
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let focus_distance = 10.0;
     let aperture = 0.1;
+    let background = Color::new(0.70, 0.80, 1.00);
 
     let camera = Camera::new(
         lookfrom,
@@ -49,7 +50,7 @@ fn main() {
         focus_distance,
     );
 
-    let raytracer = Raytracer::new(WIDTH, HEIGHT, camera, SAMPLE_SIZE);
+    let raytracer = Raytracer::new(WIDTH, HEIGHT, &camera, &background, SAMPLE_SIZE);
 
     // Scene
     let mut list = generate_random_scene();
