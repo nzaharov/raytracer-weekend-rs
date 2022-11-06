@@ -1,7 +1,7 @@
 use raytracer::{
     camera::Camera,
     hit::HitList,
-    materials::lambertian::Lambertian,
+    materials::{lambertian::Lambertian, Material},
     objects::sphere::Sphere,
     textures::image_texture::ImageTexture,
     vectors::{Point3, Vec3},
@@ -53,12 +53,12 @@ fn main() {
     let mut scene = HitList::new();
 
     let texture = ImageTexture::load_from_file("examples/assets/earthmap.jpg").unwrap();
-    let mat = Lambertian::with_texture(&texture.into());
+    let mat: Material = Lambertian::with_texture(&texture.into()).into();
 
     let sphere = Sphere {
         center: Point3::new(0.0, 0.0, 0.0),
         radius: 2.0,
-        material: mat.clone().into(),
+        material: mat.into(),
     };
 
     scene.add(Arc::new(sphere.into()));

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::aabb::AABB;
 use crate::{
     hit::{Hit, HittableImpl},
@@ -11,7 +13,7 @@ pub struct Plane {
     pub p1: Point3<f32>,
     pub p2: Point3<f32>,
     pub normal: Vec3<f32>,
-    pub material: Material,
+    pub material: Arc<Material>,
 }
 
 impl HittableImpl for Plane {

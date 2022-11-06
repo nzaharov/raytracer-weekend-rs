@@ -1,7 +1,7 @@
 use raytracer::{
     camera::Camera,
     hit::HitList,
-    materials::lambertian::Lambertian,
+    materials::{lambertian::Lambertian, Material},
     objects::sphere::Sphere,
     textures::noise::Noise,
     vectors::{Point3, Vec3},
@@ -53,7 +53,7 @@ fn main() {
     let mut scene = HitList::new();
 
     let perlin = Noise::new(4.0);
-    let mat = Lambertian::with_texture(&perlin.into());
+    let mat = Arc::<Material>::new(Lambertian::with_texture(&perlin.into()).into());
     let sphere1 = Sphere {
         center: Point3::new(0.0, -1000.0, 0.0),
         radius: 1000.0,

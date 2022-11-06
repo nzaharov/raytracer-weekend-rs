@@ -2,6 +2,7 @@
 use rand::{thread_rng, Rng};
 use raytracer::bvh::BVHNode;
 use raytracer::hit::HitList;
+use raytracer::materials::Material;
 use raytracer::materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal};
 use raytracer::objects::{moving_sphere::MovingSphere, sphere::Sphere};
 use raytracer::rays::Color;
@@ -63,7 +64,7 @@ fn generate_random_scene() -> HitList {
     let mut rng = thread_rng();
     let mut scene = HitList::new();
 
-    let ground_mat = Lambertian::new(Color::new(0.5, 0.5, 0.5));
+    let ground_mat: Material = Lambertian::new(Color::new(0.5, 0.5, 0.5)).into();
     let ground = Sphere {
         center: Point3::new(0.0, -1000.0, 0.0),
         radius: 1000.0,
@@ -84,7 +85,7 @@ fn generate_random_scene() -> HitList {
             if (center - Point3::new(4.0, 2.0, 0.0)).norm() > 0.9 {
                 if random < 0.8 {
                     let albedo = Color::new_random(0.0, 1.0) * Color::new_random(0.0, 1.0);
-                    let material = Lambertian::new(albedo).into();
+                    let material: Material = Lambertian::new(albedo).into();
                     let center_end: Point3<f32> = center + Vec3::new(0.0, rng.gen(), 0.0);
                     let sphere = MovingSphere {
                         center_start: center,
@@ -92,25 +93,25 @@ fn generate_random_scene() -> HitList {
                         time_start: 0.0,
                         time_end: 1.0,
                         radius: 0.2,
-                        material,
+                        material: material.into(),
                     };
                     scene.add(Arc::new(sphere.into()));
                 } else if random < 0.95 {
                     let albedo = Color::new_random(0.5, 1.0);
                     let fuzz = rng.gen_range(0.0..0.5);
-                    let material = Metal::new(albedo, fuzz).into();
+                    let material: Material = Metal::new(albedo, fuzz).into();
                     let sphere = Sphere {
                         center,
                         radius: 0.2,
-                        material,
+                        material: material.into(),
                     };
                     scene.add(Arc::new(sphere.into()));
                 } else {
-                    let material = Dielectric::new(1.5).into();
+                    let material: Material = Dielectric::new(1.5).into();
                     let sphere = Sphere {
                         center,
                         radius: 0.2,
-                        material,
+                        material: material.into(),
                     };
                     scene.add(Arc::new(sphere.into()));
                 }
@@ -121,17 +122,17 @@ fn generate_random_scene() -> HitList {
     let big1 = Sphere {
         center: Point3::new(0.0, 1.0, 0.0),
         radius: 1.0,
-        material: Dielectric::new(1.5).into(),
+        material: Arc::new(Dielectric::new(1.5).into()),
     };
     let big2 = Sphere {
         center: Point3::new(-4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Lambertian::new(Color::new(0.4, 0.2, 0.1)).into(),
+        material: Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)).into()),
     };
     let big3 = Sphere {
         center: Point3::new(4.0, 1.0, 0.0),
         radius: 1.0,
-        material: Metal::new(Color::new(0.7, 0.6, 0.5), 0.0).into(),
+        material: Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0).into()),
     };
 
     scene.add(Arc::new(big1.into()));

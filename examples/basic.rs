@@ -1,7 +1,7 @@
 use raytracer::{
     camera::Camera,
     hit::HitList,
-    materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal},
+    materials::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal, Material},
     objects::{plane::Plane, sphere::Sphere},
     rays::Color,
     vectors::{Point3, Vec3},
@@ -52,32 +52,32 @@ fn main() {
     // Scene
     let mut scene = HitList::new();
 
-    let mat_1 = Lambertian::new(Color::new(0.8, 0.8, 0.0));
+    let mat_1: Material = Lambertian::new(Color::new(0.8, 0.8, 0.0)).into();
     let sphere1 = Sphere {
         center: Point3::new(0.0, 0.0, -1.0),
         radius: 0.5,
         material: mat_1.into(),
     };
-    let mat_ground = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5);
+    let mat_ground: Material = Metal::new(Color::new(0.9, 0.1, 0.1), 0.5).into();
     let ground = Plane {
         p1: Point3::new(0.0, 0.0, 1.0),
         p2: Point3::new(0.0, -0.5, 0.0),
         normal: Vec3::new(0.0, 1.0, 0.0),
         material: mat_ground.into(),
     };
-    let mat_2 = Lambertian::new(Color::default());
+    let mat_2: Material = Lambertian::new(Color::default()).into();
     let sphere2 = Sphere {
         center: Point3::new(1.0, 0.0, -2.0),
         radius: 0.5,
         material: mat_2.into(),
     };
-    let mat_metal = Metal::new(Color::new(0.8, 0.8, 0.8), 0.0);
+    let mat_metal: Material = Metal::new(Color::new(0.8, 0.8, 0.8), 0.0).into();
     let metal = Sphere {
         center: Point3::new(-2.0, 0.0, -1.5),
         radius: 0.5,
         material: mat_metal.into(),
     };
-    let glass_mat = Dielectric::new(1.5);
+    let glass_mat: Material = Dielectric::new(1.5).into();
     let crystal_ball = Sphere {
         center: Point3::new(0.27, 0.1, -0.5),
         radius: -0.05,

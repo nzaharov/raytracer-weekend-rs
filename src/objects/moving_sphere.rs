@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::materials::Material;
 use crate::{aabb::AABB, vectors::Point3};
 use crate::{
@@ -15,7 +17,7 @@ pub struct MovingSphere {
     pub time_start: f32,
     pub time_end: f32,
     pub radius: f32,
-    pub material: Material,
+    pub material: Arc<Material>,
 }
 
 impl MovingSphere {

@@ -28,7 +28,7 @@ pub enum Texture {
 impl Clone for Texture {
     fn clone(&self) -> Self {
         match self {
-            Self::SolidColor(arg0) => Self::SolidColor(arg0.clone()),
+            Self::SolidColor(arg0) => Self::SolidColor(*arg0),
             Self::Checker(arg0) => Self::Checker(arg0.clone()),
             Self::Noise(arg0) => Self::Noise(arg0.clone()),
             Self::ImageTexture(arg0) => Self::ImageTexture(arg0.clone()),

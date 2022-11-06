@@ -47,7 +47,7 @@ impl Perlin {
 
     pub fn turbulence(&self, p: &Point3<f32>, depth: usize) -> f32 {
         let mut acc = 0.0;
-        let mut p = p.clone();
+        let mut p = *p;
         let mut weight = 1.0;
 
         for _ in 0..depth {

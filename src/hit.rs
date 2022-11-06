@@ -18,7 +18,7 @@ pub struct Hit {
     pub u: f32,
     pub v: f32,
     pub is_front_facing: bool,
-    pub material: Material,
+    pub material: Arc<Material>,
 }
 
 impl Hit {
@@ -27,7 +27,7 @@ impl Hit {
         t: f32,
         u: f32,
         v: f32,
-        material: Material,
+        material: Arc<Material>,
         ray: &Ray,
         outward_normal: &Vec3<f32>,
     ) -> Self {
