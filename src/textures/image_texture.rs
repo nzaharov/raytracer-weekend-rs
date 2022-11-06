@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, sync::Arc};
 
 use image::{io::Reader, ImageResult, RgbImage};
 
@@ -8,7 +8,7 @@ use super::TextureImpl;
 
 #[derive(Clone)]
 pub struct ImageTexture {
-    img: RgbImage,
+    img: Arc<RgbImage>,
 }
 
 impl ImageTexture {
@@ -19,7 +19,7 @@ impl ImageTexture {
         let img = Reader::open(path)?.decode()?;
 
         Ok(Self {
-            img: img.into_rgb8(),
+            img: Arc::new(img.into_rgb8()),
         })
     }
 }
