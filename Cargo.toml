@@ -16,3 +16,4 @@ rand = "0.8.5"
 jemallocator = "0.5.0"
 enum_dispatch = "0.3.8"
 rayon = "1.5.3"
+indicatif = { version = "0.17.1", features = ["rayon"] }

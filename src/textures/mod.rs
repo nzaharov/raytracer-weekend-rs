@@ -1,4 +1,5 @@
 pub mod checker;
+pub mod image_texture;
 pub mod noise;
 mod perlin;
 pub mod solid_color;
@@ -7,6 +8,7 @@ use enum_dispatch::enum_dispatch;
 
 use crate::{rays::Color, vectors::Point3};
 use checker::*;
+use image_texture::*;
 use noise::*;
 use solid_color::*;
 
@@ -20,6 +22,7 @@ pub enum Texture {
     SolidColor,
     Checker,
     Noise,
+    ImageTexture,
 }
 
 impl Clone for Texture {
@@ -28,6 +31,7 @@ impl Clone for Texture {
             Self::SolidColor(arg0) => Self::SolidColor(arg0.clone()),
             Self::Checker(arg0) => Self::Checker(arg0.clone()),
             Self::Noise(arg0) => Self::Noise(arg0.clone()),
+            Self::ImageTexture(arg0) => Self::ImageTexture(arg0.clone()),
         }
     }
 }

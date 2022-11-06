@@ -12,7 +12,7 @@ use std::time::{Instant, SystemTime};
 
 const FILENAME: &str = "balls";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const SAMPLE_SIZE: u32 = 2000;
+const SAMPLE_SIZE: u32 = 100;
 
 fn main() {
     // Start timer

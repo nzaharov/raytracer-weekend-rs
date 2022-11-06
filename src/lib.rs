@@ -7,6 +7,7 @@ use crate::hit::HittableImpl;
 use camera::Camera;
 use hit::Hittable;
 use image::RgbImage;
+use indicatif::ParallelProgressIterator;
 use materials::MaterialImpl;
 use rand::{thread_rng, Rng};
 use rayon::prelude::*;
@@ -51,6 +52,7 @@ impl<'a> Raytracer {
             .rev()
             .collect::<Vec<u32>>()
             .into_par_iter()
+            .progress_count(self.height as u64)
             .map_init(thread_rng, |rng, line| {
                 (0..self.width)
                     .map(|w| (line, w))
