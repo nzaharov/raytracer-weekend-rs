@@ -7,6 +7,7 @@ use crate::{
 
 use super::MaterialImpl;
 
+#[derive(Clone)]
 pub struct DiffuseLight {
     emission: Texture,
 }

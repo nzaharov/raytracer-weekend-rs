@@ -1,8 +1,8 @@
 use raytracer::{
     camera::Camera,
-    hit::HitList,
-    materials::{lambertian::Lambertian, Material},
-    objects::sphere::Sphere,
+    hit::{HitList, Hittable},
+    materials::{diffuse_light::DiffuseLight, lambertian::Lambertian, Material},
+    objects::{sphere::Sphere, xy_rect::XYRect},
     rays::Color,
     textures::noise::Noise,
     vectors::{Point3, Vec3},
@@ -15,7 +15,7 @@ use std::{
 
 const FILENAME: &str = "marble";
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const SAMPLE_SIZE: u32 = 1000;
+const SAMPLE_SIZE: u32 = 100;
 
 fn main() {
     let now = Instant::now();
@@ -34,18 +34,18 @@ fn main() {
     const HEIGHT: u32 = (WIDTH as f32 / ASPECT_RATIO) as u32;
 
     // Camera
-    let lookfrom = Point3::new(13.0, 2.0, 3.0);
-    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let lookfrom = Point3::new(26.0, 3.0, 6.0);
+    let lookat = Point3::new(0.0, 2.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let focus_distance = 10.0;
     let aperture = 0.0;
-    let background = Color::new(0.70, 0.80, 1.00);
+    let background = Color::new(0.0, 0.0, 0.0);
 
     let camera = Camera::new(
         lookfrom,
         lookat,
         vup,
-        40.0,
+        20.0,
         ASPECT_RATIO,
         aperture,
         focus_distance,
@@ -67,8 +67,20 @@ fn main() {
         material: mat.clone().into(),
     };
 
+    let light: Material = DiffuseLight::with_color(Color::new(4.0, 4.0, 4.0)).into();
+    let rect: Hittable = XYRect {
+        x0: 3.0,
+        x1: 5.0,
+        y0: 1.0,
+        y1: 3.0,
+        k: -2.0,
+        material: light.into(),
+    }
+    .into();
+
     scene.add(Arc::new(sphere1.into()));
     scene.add(Arc::new(sphere2.into()));
+    scene.add(rect.into());
 
     let raytracer = Raytracer::new(WIDTH, HEIGHT, &camera, &background, SAMPLE_SIZE);
 

@@ -8,6 +8,7 @@ use enum_dispatch::enum_dispatch;
 use crate::rays::Ray;
 use crate::{hit::Hit, rays::Color, vectors::Point3};
 use dielectric::*;
+use diffuse_light::*;
 use lambertian::*;
 use metal::*;
 
@@ -25,6 +26,7 @@ pub enum Material {
     Dielectric,
     Lambertian,
     Metal,
+    DiffuseLight,
 }
 
 impl Clone for Material {
@@ -33,6 +35,7 @@ impl Clone for Material {
             Self::Dielectric(arg0) => Self::Dielectric(*arg0),
             Self::Lambertian(arg0) => Self::Lambertian(arg0.clone()),
             Self::Metal(arg0) => Self::Metal(*arg0),
+            Self::DiffuseLight(arg0) => Self::DiffuseLight(arg0.clone()),
         }
     }
 }

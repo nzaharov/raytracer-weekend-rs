@@ -2,7 +2,7 @@ use enum_dispatch::enum_dispatch;
 
 use crate::bvh::*;
 use crate::materials::Material;
-use crate::objects::{moving_sphere::*, plane::*, sphere::*};
+use crate::objects::{moving_sphere::*, plane::*, sphere::*, xy_rect::*};
 use crate::rays::Ray;
 use crate::{
     aabb::AABB,
@@ -145,4 +145,5 @@ pub enum Hittable {
     MovingSphere,
     Plane,
     Sphere,
+    XYRect,
 }
