@@ -2,7 +2,7 @@ use raytracer::{
     camera::Camera,
     hit::{HitList, Hittable},
     materials::{diffuse_light::DiffuseLight, lambertian::Lambertian, Material},
-    objects::{xy_rect::XYRect, xz_rect::XZRect, yz_rect::YZRect},
+    objects::{box_box::BoxBox, xy_rect::XYRect, xz_rect::XZRect, yz_rect::YZRect},
     rays::Color,
     vectors::{Point3, Vec3},
     Raytracer,
@@ -112,12 +112,27 @@ fn main() {
     }
     .into();
 
+    let box1: Hittable = BoxBox::from_points(
+        Point3::new(130.0, 0.0, 65.0),
+        Point3::new(295.0, 165.0, 230.0),
+        &white,
+    )
+    .into();
+    let box2: Hittable = BoxBox::from_points(
+        Point3::new(265.0, 0.0, 295.0),
+        Point3::new(430.0, 330.0, 460.0),
+        &white,
+    )
+    .into();
+
     scene.add(light.into());
     scene.add(left.into());
     scene.add(right.into());
     scene.add(bot.into());
     scene.add(top.into());
     scene.add(front.into());
+    scene.add(box1.into());
+    scene.add(box2.into());
 
     let raytracer = Raytracer::new(WIDTH, HEIGHT, &camera, &background, SAMPLE_SIZE);
 

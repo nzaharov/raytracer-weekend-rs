@@ -20,6 +20,19 @@ pub struct XYRect {
     pub material: Arc<Material>,
 }
 
+impl XYRect {
+    pub fn new(x0: f32, x1: f32, y0: f32, y1: f32, k: f32, material: Arc<Material>) -> Self {
+        Self {
+            x0,
+            x1,
+            y0,
+            y1,
+            k,
+            material,
+        }
+    }
+}
+
 impl HittableImpl for XYRect {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<Hit> {
         let t = (self.k - ray.origin().z()) / ray.direction().z();

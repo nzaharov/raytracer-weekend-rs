@@ -4,3 +4,4 @@ pub mod sphere;
 pub mod xy_rect;
 pub mod xz_rect;
 pub mod yz_rect;
+pub mod box_box;
