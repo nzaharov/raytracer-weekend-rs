@@ -23,6 +23,7 @@ pub mod objects;
 pub mod rays;
 pub mod textures;
 pub mod vectors;
+pub mod volumes;
 
 const MAX_DEPTH: u32 = 50;
 const BIAS: f32 = 0.001;

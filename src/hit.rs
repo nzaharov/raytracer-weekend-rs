@@ -5,6 +5,7 @@ use crate::materials::Material;
 use crate::objects::box_box::BoxBox;
 use crate::objects::{moving_sphere::*, plane::*, sphere::*, xy_rect::*, xz_rect::*, yz_rect::*};
 use crate::rays::Ray;
+use crate::volumes::*;
 use crate::{
     aabb::AABB,
     vectors::{Point3, Vec3},
@@ -291,4 +292,5 @@ pub enum Hittable {
     BoxBox,
     Translate,
     RotateY,
+    ConstantMedium,
 }

@@ -5,6 +5,7 @@ use raytracer::{
     objects::{box_box::BoxBox, xy_rect::XYRect, xz_rect::XZRect, yz_rect::YZRect},
     rays::Color,
     vectors::{Point3, Vec3},
+    volumes::ConstantMedium,
     Raytracer,
 };
 use std::time::{Instant, SystemTime};
@@ -50,12 +51,12 @@ fn main() {
     // Scene
     let mut scene = HitList::new();
 
-    let light: Material = DiffuseLight::with_color(Color::new(15.0, 15.0, 15.0)).into();
+    let light: Material = DiffuseLight::with_color(Color::new(7.0, 7.0, 7.0)).into();
     let light: Hittable = XZRect {
-        x0: 213.0,
-        x1: 343.0,
-        z0: 227.0,
-        z1: 332.0,
+        x0: 113.0,
+        x1: 443.0,
+        z0: 127.0,
+        z1: 432.0,
         k: 554.0,
         material: light.into(),
     }
@@ -123,6 +124,7 @@ fn main() {
         &Vec3::new(295.0, 0.0, 230.0),
     )
     .into();
+    let box1: Hittable = ConstantMedium::new(box1, 0.01, Color::new(0.0, 0.0, 0.0)).into();
 
     let box2: Hittable = BoxBox::from_points(
         Point3::new(0.0, 0.0, 0.0),
@@ -135,6 +137,7 @@ fn main() {
         &Vec3::new(130.0, 0.0, 65.0),
     )
     .into();
+    let box2: Hittable = ConstantMedium::new(box2, 0.01, Color::new(1.0, 1.0, 1.0)).into();
 
     scene.add(light.into());
     scene.add(left.into());

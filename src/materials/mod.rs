@@ -1,5 +1,6 @@
 pub mod dielectric;
 pub mod diffuse_light;
+pub mod isotropic;
 pub mod lambertian;
 pub mod metal;
 
@@ -9,6 +10,7 @@ use crate::rays::Ray;
 use crate::{hit::Hit, rays::Color, vectors::Point3};
 use dielectric::*;
 use diffuse_light::*;
+use isotropic::*;
 use lambertian::*;
 use metal::*;
 
@@ -27,6 +29,7 @@ pub enum Material {
     Lambertian,
     Metal,
     DiffuseLight,
+    Isotropic,
 }
 
 impl Clone for Material {
@@ -36,6 +39,7 @@ impl Clone for Material {
             Self::Lambertian(arg0) => Self::Lambertian(arg0.clone()),
             Self::Metal(arg0) => Self::Metal(*arg0),
             Self::DiffuseLight(arg0) => Self::DiffuseLight(arg0.clone()),
+            Self::Isotropic(arg0) => Self::Isotropic(arg0.clone()),
         }
     }
 }
