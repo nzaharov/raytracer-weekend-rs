@@ -1,6 +1,6 @@
 use raytracer::{
     camera::Camera,
-    hit::{HitList, Hittable},
+    hit::{HitList, Hittable, RotateY, Translate},
     materials::{diffuse_light::DiffuseLight, lambertian::Lambertian, Material},
     objects::{box_box::BoxBox, xy_rect::XYRect, xz_rect::XZRect, yz_rect::YZRect},
     rays::Color,
@@ -113,15 +113,26 @@ fn main() {
     .into();
 
     let box1: Hittable = BoxBox::from_points(
-        Point3::new(130.0, 0.0, 65.0),
-        Point3::new(295.0, 165.0, 230.0),
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 330.0, 165.0),
         &white,
     )
     .into();
+    let box1: Hittable = Translate::new(
+        RotateY::new(box1, 15.0).into(),
+        &Vec3::new(295.0, 0.0, 230.0),
+    )
+    .into();
+
     let box2: Hittable = BoxBox::from_points(
-        Point3::new(265.0, 0.0, 295.0),
-        Point3::new(430.0, 330.0, 460.0),
+        Point3::new(0.0, 0.0, 0.0),
+        Point3::new(165.0, 165.0, 165.0),
         &white,
+    )
+    .into();
+    let box2: Hittable = Translate::new(
+        RotateY::new(box2, -18.0).into(),
+        &Vec3::new(130.0, 0.0, 65.0),
     )
     .into();
 
