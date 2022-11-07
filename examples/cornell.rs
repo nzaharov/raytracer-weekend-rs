@@ -116,7 +116,7 @@ fn main() {
     let box1: Hittable = BoxBox::from_points(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 330.0, 165.0),
-        &white,
+        white.clone().into(),
     )
     .into();
     let box1: Hittable = Translate::new(
@@ -129,7 +129,7 @@ fn main() {
     let box2: Hittable = BoxBox::from_points(
         Point3::new(0.0, 0.0, 0.0),
         Point3::new(165.0, 165.0, 165.0),
-        &white,
+        white.into(),
     )
     .into();
     let box2: Hittable = Translate::new(

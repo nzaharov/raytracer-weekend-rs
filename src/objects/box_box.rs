@@ -17,9 +17,7 @@ pub struct BoxBox {
 }
 
 impl BoxBox {
-    pub fn from_points(p0: Point3<f32>, p1: Point3<f32>, material: &Material) -> Self {
-        let material = Arc::new(material.clone());
-
+    pub fn from_points(p0: Point3<f32>, p1: Point3<f32>, material: Arc<Material>) -> Self {
         let mut sides = HitList::new();
 
         sides.add(Arc::new(
